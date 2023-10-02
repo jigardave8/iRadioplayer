@@ -300,12 +300,8 @@ struct MediaView: View {
         }
         .onAppear {
             // Set up the audio session for background playing
-            do {
-                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
-                try AVAudioSession.sharedInstance().setActive(true)
-            } catch {
-                print("Failed to configure audio session:", error.localizedDescription)
-            }
+            setupAudioSession()
+
 
             // Set the audio player manager as the delegate
             audioPlayerManager.audioPlayer?.delegate = audioPlayerManager
@@ -313,8 +309,23 @@ struct MediaView: View {
         .sheet(isPresented: $audioPlayerManager.showSettings) {
             SettingsView()
         }
+      
+        
+        
     }
+    func setupAudioSession() {
+          do {
+              try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+              try AVAudioSession.sharedInstance().setActive(true)
+          } catch {
+              print("Failed to configure audio session:", error.localizedDescription)
+          }
+      }
+  
 }
+
+
+
 
 struct SettingsView: View {
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
