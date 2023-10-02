@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B76320372ACB58AC00A1319E /* MediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76320362ACB58AC00A1319E /* MediaView.swift */; };
+		B76320392ACB5AE400A1319E /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76320382ACB5AE400A1319E /* RadioView.swift */; };
 		B7DA1BD62AB83FE300B54B7F /* RadioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DA1BD52AB83FE200B54B7F /* RadioApp.swift */; };
 		B7DA1BD82AB83FE300B54B7F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DA1BD72AB83FE300B54B7F /* ContentView.swift */; };
 		B7DA1BDA2AB83FF400B54B7F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7DA1BD92AB83FF400B54B7F /* Assets.xcassets */; };
@@ -14,6 +16,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B76320362ACB58AC00A1319E /* MediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaView.swift; sourceTree = "<group>"; };
+		B76320382ACB5AE400A1319E /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
 		B7DA1BD22AB83FE200B54B7F /* Radio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7DA1BD52AB83FE200B54B7F /* RadioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioApp.swift; sourceTree = "<group>"; };
 		B7DA1BD72AB83FE300B54B7F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -55,6 +59,8 @@
 				B7DA1BE32AB840B900B54B7F /* Info.plist */,
 				B7DA1BD52AB83FE200B54B7F /* RadioApp.swift */,
 				B7DA1BD72AB83FE300B54B7F /* ContentView.swift */,
+				B76320362ACB58AC00A1319E /* MediaView.swift */,
+				B76320382ACB5AE400A1319E /* RadioView.swift */,
 				B7DA1BD92AB83FF400B54B7F /* Assets.xcassets */,
 				B7DA1BDB2AB83FF400B54B7F /* Preview Content */,
 			);
@@ -139,8 +145,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B76320392ACB5AE400A1319E /* RadioView.swift in Sources */,
 				B7DA1BD82AB83FE300B54B7F /* ContentView.swift in Sources */,
 				B7DA1BD62AB83FE300B54B7F /* RadioApp.swift in Sources */,
+				B76320372ACB58AC00A1319E /* MediaView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,6 +286,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Radio/Info.plist;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "We need access to your music library";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Access to microphone?";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library for photos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -309,6 +320,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Radio/Info.plist;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "We need access to your music library";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Access to microphone?";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library for photos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
