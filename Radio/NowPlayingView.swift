@@ -30,21 +30,25 @@ struct NowPlayingView: View {
                         .shadow(radius: 5)
                 }
                 
-                VStack(spacing: 5) {
+                VStack(spacing: 10) {
                     Text(currentSong.title ?? "Unknown Title")
                         .font(.title)
+                        .fontWidth(.standard)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     
                     Text(currentSong.artist ?? "Unknown Artist")
                         .font(.subheadline)
                         .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     
                     Text(currentSong.albumTitle ?? "Unknown Album")
                         .font(.footnote)
                         .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
                 
@@ -68,10 +72,13 @@ struct NowPlayingView: View {
         }
         .padding()
         .background(
-            LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                .edgesIgnoringSafeArea(.all)
-                .cornerRadius(10)
-                .shadow(radius: 5)
+            GeometryReader { geometry in
+                LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+            }
+            .edgesIgnoringSafeArea(.all)
         )
         .padding()
     }

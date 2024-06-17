@@ -58,7 +58,16 @@ struct MediaView: View {
                     VStack {
                         // Now Playing View
                         NowPlayingView(audioPlayerManager: audioPlayerManager)
-
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    .frame(width: geometry.size.width * 0.8, height: geometry.size.height * 0.6)
+                                    .cornerRadius(10)
+                                    .shadow(radius: 5)
+                            )
+                            .padding()
+                        
                         // Music Player Controls
                         HStack(spacing: 20) {
                             Spacer()
