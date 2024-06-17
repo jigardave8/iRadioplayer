@@ -35,7 +35,6 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     // Equalizer settings
     enum EqualizerSetting: String, CaseIterable {
-        
         case normal = "Normal"
         case rock = "Rock"
         case pop = "Pop"
@@ -184,151 +183,196 @@ struct MediaView: View {
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
 
+    @State private var isSidebarExpanded = false
+
     var body: some View {
         NavigationView {
-            VStack {
-                // panel for user's media library
-                VStack {
-                    Text("Media Library")
-                        .font(.headline)
-                        .padding()
-                    List {
-                        ForEach(libraryViewModel.songs, id: \.persistentID) { song in
-                            Button(action: {
-                                libraryViewModel.selectedSong = song
-                                audioPlayerManager.play(song: song)
-                            }) {
-                                HStack {
-                                    Text(song.title ?? "Unknown Title")
-                                        .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
-                                    Spacer()
-                                    if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
-                                        Image(systemName: "speaker.wave.2.fill")
-                                            .foregroundColor(.green)
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    // Side Panel (Collapsible)
+                    VStack {
+                        Text("Media Library")
+                            .font(.headline)
+                            .padding()
+                        List {
+                            ForEach(libraryViewModel.songs, id: \.persistentID) { song in
+                                Button(action: {
+                                    libraryViewModel.selectedSong = song
+                                    audioPlayerManager.play(song: song)
+                                }) {
+                                    HStack {
+                                        Text(song.title ?? "Unknown Title")
+                                            .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
+                                        Spacer()
+                                        if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
+                                            Image(systemName: "speaker.wave.2.fill")
+                                                .foregroundColor(.green)
+                                        }
                                     }
+                                    .padding(2)
+                                    .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
                                 }
-                                .padding(2)
-                                .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
                             }
                         }
+                        .onAppear {
+                            _ = libraryViewModel.$songs
+                                .sink { _ in
+                                    // Handle songs change
+                                }
+
+                            // Fetch songs
+                            libraryViewModel.fetchSongs()
+                        }
                     }
-                    .onAppear {
-                        _ = libraryViewModel.$songs
-                            .sink { _ in
-                                // Handle songs change
+                    .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
+                    .animation(.default)
+
+                    // Main Content Area
+                    VStack {
+                        // Now Playing View
+                        NowPlayingView(audioPlayerManager: audioPlayerManager)
+
+                        // Music Player Controls
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                audioPlayerManager.shuffle()
+                            }) {
+                                Image(systemName: "shuffle")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(25)
                             }
-
-                        // Fetch songs
-                        libraryViewModel.fetchSongs()
+                            Spacer()
+                            Button(action: {
+                                audioPlayerManager.playPrevious()
+                            }) {
+                                Image(systemName: "backward.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(25)
+                            }
+                            Spacer()
+                            Button(action: {
+                                audioPlayerManager.togglePlayPause()
+                            }) {
+                                Image(systemName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                    .resizable()
+                                    .frame(width: 30, height: 30)
+                                    .padding()
+                                    .background(Color.green)
+                                    .cornerRadius(35)
+                            }
+                            Spacer()
+                            Button(action: {
+                                audioPlayerManager.playNext()
+                            }) {
+                                Image(systemName: "forward.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(25)
+                            }
+                            Spacer()
+                            Button(action: {
+                                audioPlayerManager.stop()
+                            }) {
+                                Image(systemName: "stop.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(25)
+                            }
+                            Spacer()
+                        }
+                        .padding()
                     }
                 }
-
-                // music player controls
-                VStack {
-                    HStack {
-                        Button(action: {
-                            audioPlayerManager.shuffle()
-                        }) {
-                            Image(systemName: "shuffle")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(25)
-                        }
-                        Spacer()
-                        Button(action: {
-                            audioPlayerManager.playPrevious()
-                        }) {
-                            Image(systemName: "backward.fill")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(25)
-                        }
-                        Spacer()
-                        Button(action: {
-                            audioPlayerManager.togglePlayPause()
-                        }) {
-                            Image(systemName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .padding()
-                                .background(Color.green)
-                                .cornerRadius(35)
-                        }
-                        Spacer()
-                        Button(action: {
-                            audioPlayerManager.playNext()
-                        }) {
-                            Image(systemName: "forward.fill")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(25)
-                        }
-                        Spacer()
-                        Button(action: {
-                            audioPlayerManager.stop()
-                        }) {
-                            Image(systemName: "stop.fill")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(25)
-                        }
-                    }
-                }
-            }
-            .navigationBarItems(trailing:
-                HStack {
-                    NavigationLink(destination: SettingsView()) {
-                        Image(systemName: "gear")
-                            .padding()
-                    }
+                .navigationBarItems(leading:
                     Button(action: {
-                        // Funky button action
+                        withAnimation {
+                            self.isSidebarExpanded.toggle()
+                        }
                     }) {
-                        Image(systemName: "star.fill")
+                        Image(systemName: isSidebarExpanded ? "chevron.left" : "sidebar.left")
                             .padding()
+                    },
+                trailing:
+                    HStack {
+                        NavigationLink(destination: SettingsView(audioPlayerManager: audioPlayerManager)) {
+                            Image(systemName: "gear")
+                                .padding()
+                        }
+                        Button(action: {
+                            // Funky button action
+                        }) {
+                            Image(systemName: "star.fill")
+                                .padding()
+                        }
                     }
-                }
-            )
-        }
-        .onAppear {
-            // Set up the audio session for background playing
-            setupAudioSession()
+                )
+            }
+            .onAppear {
+                // Set up the audio session for background playing
+                setupAudioSession()
 
-
-            // Set the audio player manager as the delegate
-            audioPlayerManager.audioPlayer?.delegate = audioPlayerManager
+                // Set the audio player manager as the delegate
+                audioPlayerManager.audioPlayer?.delegate = audioPlayerManager
+            }
+            .sheet(isPresented: $audioPlayerManager.showSettings) {
+                SettingsView(audioPlayerManager: audioPlayerManager)
+            }
         }
-        .sheet(isPresented: $audioPlayerManager.showSettings) {
-            SettingsView()
-        }
-      
-        
-        
     }
+
     func setupAudioSession() {
-          do {
-              try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
-              try AVAudioSession.sharedInstance().setActive(true)
-          } catch {
-              print("Failed to configure audio session:", error.localizedDescription)
-          }
-      }
-  
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to configure audio session:", error.localizedDescription)
+        }
+    }
 }
 
+struct NowPlayingView: View {
+    @ObservedObject var audioPlayerManager: AudioPlayerManager
 
+    var body: some View {
+        VStack {
+            // Now Playing Info
+            if let currentSong = audioPlayerManager.audioPlayer?.url {
+                Text("Now Playing: \(currentSong.lastPathComponent)")
+                    .font(.headline)
+                    .padding()
+            }
 
+            // Visualizer (Replace with your desired visualizer component)
+            Rectangle()
+                .frame(height: 100)
+                .foregroundColor(.blue)
+                .opacity(0.3)
+                .padding()
+
+            // Seek Bar (Replace with your desired seek bar component)
+            Text("Seek Bar")
+                .padding()
+
+            // Advanced Controls (Replace with your desired advanced controls)
+            Text("Advanced Controls")
+                .padding()
+        }
+    }
+}
 
 struct SettingsView: View {
-    @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
+    @ObservedObject var audioPlayerManager: AudioPlayerManager
 
     var body: some View {
         NavigationView {
@@ -353,4 +397,3 @@ struct SettingsView: View {
         }
     }
 }
-
