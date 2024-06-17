@@ -6,178 +6,6 @@
 //
 
 import SwiftUI
-import MediaPlayer
-import AVFoundation
-import Combine
-
-class LibraryViewModel: ObservableObject {
-    static let shared = LibraryViewModel()
-
-    @Published var songs: [MPMediaItem] = []
-    @Published var selectedSong: MPMediaItem?
-
-    func fetchSongs() {
-        let query = MPMediaQuery.songs()
-        if let items = query.items {
-            songs = items
-        }
-    }
-}
-
-class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
-    static let shared = AudioPlayerManager()
-
-    @Published var isPlaying: Bool = false
-    @Published var audioLevels: Float = 0.0
-    @Published var showSettings: Bool = false
-    var audioPlayer: AVAudioPlayer?
-    var currentIndex: Int = 0
-
-    // Equalizer settings
-    enum EqualizerSetting: String, CaseIterable {
-        case normal = "Normal"
-        case rock = "Rock"
-        case pop = "Pop"
-        case jazz = "Jazz"
-        case bass = "Bass"
-        case treble = "Treble"
-        case bassAndTreble = "Bass & Treble"
-        case classical = "Classical"
-        case hipHop = "Hip-Hop"
-        case reset = "Reset"
-    }
-
-    @Published var currentEqualizerSetting: EqualizerSetting = .normal {
-        didSet {
-            applyEqualizerSetting()
-        }
-    }
-
-    func play(song: MPMediaItem) {
-        guard let url = song.assetURL else { return }
-
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.delegate = self
-            audioPlayer?.isMeteringEnabled = true
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-            isPlaying = true
-
-            // Set selected song index
-            currentIndex = LibraryViewModel.shared.songs.firstIndex(of: song) ?? 0
-
-            // Apply equalizer settings when a new song starts playing
-            applyEqualizerSetting()
-        } catch {
-            print("Error initializing audio player: \(error.localizedDescription)")
-        }
-    }
-
-    func togglePlayPause() {
-        if isPlaying {
-            audioPlayer?.pause()
-        } else {
-            audioPlayer?.play()
-        }
-        isPlaying.toggle()
-    }
-
-    func stop() {
-        if isPlaying {
-            audioPlayer?.stop()
-            audioPlayer = nil
-            isPlaying.toggle()
-        }
-    }
-
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        isPlaying = false
-        playNext()
-    }
-
-    func updateAudioLevels() {
-        guard let audioPlayer = audioPlayer else {
-            return
-        }
-
-        audioPlayer.updateMeters()
-        audioLevels = audioPlayer.averagePower(forChannel: 0) / -160.0
-    }
-
-    func playNext() {
-        if LibraryViewModel.shared.songs.isEmpty {
-            return
-        }
-
-        currentIndex = (currentIndex + 1) % LibraryViewModel.shared.songs.count
-        play(song: LibraryViewModel.shared.songs[currentIndex])
-    }
-
-    func playPrevious() {
-        if LibraryViewModel.shared.songs.isEmpty {
-            return
-        }
-
-        currentIndex = (currentIndex - 1 + LibraryViewModel.shared.songs.count) % LibraryViewModel.shared.songs.count
-        play(song: LibraryViewModel.shared.songs[currentIndex])
-    }
-
-    func shuffle() {
-        LibraryViewModel.shared.songs.shuffle()
-        currentIndex = 0
-        play(song: LibraryViewModel.shared.songs[currentIndex])
-    }
-
-    private func applyEqualizerSetting() {
-        guard let audioPlayer = audioPlayer else { return }
-
-        // Reset equalizer settings
-        audioPlayer.updateMeters()
-        audioPlayer.enableRate = false
-        audioPlayer.rate = 1.0
-
-        switch currentEqualizerSetting {
-        case .normal:
-            // Apply normal equalizer settings
-            break
-        case .rock:
-            // Apply rock equalizer settings
-            audioPlayer.enableRate = true
-            audioPlayer.rate = 1.1
-        case .pop:
-            // Apply pop equalizer settings
-            audioPlayer.enableRate = true
-            audioPlayer.rate = 1.2
-        case .jazz:
-            // Apply jazz equalizer settings
-            audioPlayer.enableRate = true
-            audioPlayer.rate = 1.3
-        case .bass:
-            // Apply bass equalizer settings
-            audioPlayer.enableRate = true
-            audioPlayer.rate = 1.2
-        case .treble:
-            // Apply treble equalizer settings
-            audioPlayer.enableRate = true
-            audioPlayer.rate = 0.8
-        case .bassAndTreble:
-            // Apply bass and treble equalizer settings
-            audioPlayer.enableRate = true
-            audioPlayer.rate = 1.5
-        case .classical:
-            // Apply classical equalizer settings
-            break
-        case .hipHop:
-            // Apply hip-hop equalizer settings
-            break
-        case .reset:
-            // Reset equalizer settings
-            audioPlayer.enableRate = false
-            audioPlayer.rate = 1.0
-        }
-    }
-}
 
 struct MediaView: View {
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
@@ -203,29 +31,27 @@ struct MediaView: View {
                                     HStack {
                                         Text(song.title ?? "Unknown Title")
                                             .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
+                                            .padding(8)
+                                            .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
+                                            .cornerRadius(8)
                                         Spacer()
                                         if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
                                             Image(systemName: "speaker.wave.2.fill")
                                                 .foregroundColor(.green)
+                                                .padding(8)
+                                                .background(Color.white)
+                                                .cornerRadius(8)
                                         }
                                     }
-                                    .padding(2)
-                                    .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
                                 }
                             }
                         }
                         .onAppear {
-                            _ = libraryViewModel.$songs
-                                .sink { _ in
-                                    // Handle songs change
-                                }
-
-                            // Fetch songs
                             libraryViewModel.fetchSongs()
                         }
                     }
                     .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
-                    .animation(.default)
+                    .animation(.easeInOut)
 
                     // Main Content Area
                     VStack {
@@ -233,7 +59,7 @@ struct MediaView: View {
                         NowPlayingView(audioPlayerManager: audioPlayerManager)
 
                         // Music Player Controls
-                        HStack {
+                        HStack(spacing: 20) {
                             Spacer()
                             Button(action: {
                                 audioPlayerManager.shuffle()
@@ -241,51 +67,47 @@ struct MediaView: View {
                                 Image(systemName: "shuffle")
                                     .resizable()
                                     .frame(width: 20, height: 20)
-                                    .padding()
+                                    .padding(12)
                                     .background(Color.white)
                                     .cornerRadius(25)
                             }
-                            Spacer()
                             Button(action: {
                                 audioPlayerManager.playPrevious()
                             }) {
                                 Image(systemName: "backward.fill")
                                     .resizable()
                                     .frame(width: 20, height: 20)
-                                    .padding()
+                                    .padding(12)
                                     .background(Color.white)
                                     .cornerRadius(25)
                             }
-                            Spacer()
                             Button(action: {
                                 audioPlayerManager.togglePlayPause()
                             }) {
                                 Image(systemName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                                     .resizable()
                                     .frame(width: 30, height: 30)
-                                    .padding()
+                                    .padding(16)
                                     .background(Color.green)
                                     .cornerRadius(35)
                             }
-                            Spacer()
                             Button(action: {
                                 audioPlayerManager.playNext()
                             }) {
                                 Image(systemName: "forward.fill")
                                     .resizable()
                                     .frame(width: 20, height: 20)
-                                    .padding()
+                                    .padding(12)
                                     .background(Color.white)
                                     .cornerRadius(25)
                             }
-                            Spacer()
                             Button(action: {
                                 audioPlayerManager.stop()
                             }) {
                                 Image(systemName: "stop.fill")
                                     .resizable()
                                     .frame(width: 20, height: 20)
-                                    .padding()
+                                    .padding(12)
                                     .background(Color.white)
                                     .cornerRadius(25)
                             }
@@ -304,13 +126,13 @@ struct MediaView: View {
                             .padding()
                     },
                 trailing:
-                    HStack {
+                    HStack(spacing: 20) {
                         NavigationLink(destination: SettingsView(audioPlayerManager: audioPlayerManager)) {
                             Image(systemName: "gear")
                                 .padding()
                         }
                         Button(action: {
-                            // Funky button action
+                            // Implement custom action for the star button
                         }) {
                             Image(systemName: "star.fill")
                                 .padding()
@@ -319,81 +141,11 @@ struct MediaView: View {
                 )
             }
             .onAppear {
-                // Set up the audio session for background playing
-                setupAudioSession()
-
-                // Set the audio player manager as the delegate
-                audioPlayerManager.audioPlayer?.delegate = audioPlayerManager
+                audioPlayerManager.setupAudioSession()
             }
             .sheet(isPresented: $audioPlayerManager.showSettings) {
                 SettingsView(audioPlayerManager: audioPlayerManager)
             }
-        }
-    }
-
-    func setupAudioSession() {
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("Failed to configure audio session:", error.localizedDescription)
-        }
-    }
-}
-
-struct NowPlayingView: View {
-    @ObservedObject var audioPlayerManager: AudioPlayerManager
-
-    var body: some View {
-        VStack {
-            // Now Playing Info
-            if let currentSong = audioPlayerManager.audioPlayer?.url {
-                Text("Now Playing: \(currentSong.lastPathComponent)")
-                    .font(.headline)
-                    .padding()
-            }
-
-            // Visualizer (Replace with your desired visualizer component)
-            Rectangle()
-                .frame(height: 100)
-                .foregroundColor(.blue)
-                .opacity(0.3)
-                .padding()
-
-            // Seek Bar (Replace with your desired seek bar component)
-            Text("Seek Bar")
-                .padding()
-
-            // Advanced Controls (Replace with your desired advanced controls)
-            Text("Advanced Controls")
-                .padding()
-        }
-    }
-}
-
-struct SettingsView: View {
-    @ObservedObject var audioPlayerManager: AudioPlayerManager
-
-    var body: some View {
-        NavigationView {
-            List {
-                Section(header: Text("Equalizer Settings")) {
-                    ForEach(AudioPlayerManager.EqualizerSetting.allCases, id: \.self) { option in
-                        Button(action: {
-                            audioPlayerManager.currentEqualizerSetting = option
-                        }) {
-                            HStack {
-                                Text(option.rawValue)
-                                Spacer()
-                                if audioPlayerManager.currentEqualizerSetting == option {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationBarTitle("Settings")
         }
     }
 }
