@@ -39,7 +39,7 @@ struct MediaView: View {
                                             Image(systemName: "speaker.wave.2.fill")
                                                 .foregroundColor(.green)
                                                 .padding(8)
-                                                .background(Color.white)
+                                                .background(Color.gray)
                                                 .cornerRadius(8)
                                         }
                                     }
@@ -51,6 +51,7 @@ struct MediaView: View {
                         }
                     }
                     .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
+                    .background(Color.gray.opacity(0.1))
                     .animation(.easeInOut)
 
                     // Main Content Area
@@ -61,60 +62,21 @@ struct MediaView: View {
                         // Music Player Controls
                         HStack(spacing: 20) {
                             Spacer()
-                            Button(action: {
-                                audioPlayerManager.shuffle()
-                            }) {
-                                Image(systemName: "shuffle")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .padding(12)
-                                    .background(Color.white)
-                                    .cornerRadius(25)
-                            }
-                            Button(action: {
-                                audioPlayerManager.playPrevious()
-                            }) {
-                                Image(systemName: "backward.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .padding(12)
-                                    .background(Color.white)
-                                    .cornerRadius(25)
-                            }
-                            Button(action: {
-                                audioPlayerManager.togglePlayPause()
-                            }) {
-                                Image(systemName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                    .resizable()
-                                    .frame(width: 30, height: 30)
-                                    .padding(16)
-                                    .background(Color.green)
-                                    .cornerRadius(35)
-                            }
-                            Button(action: {
-                                audioPlayerManager.playNext()
-                            }) {
-                                Image(systemName: "forward.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .padding(12)
-                                    .background(Color.white)
-                                    .cornerRadius(25)
-                            }
-                            Button(action: {
-                                audioPlayerManager.stop()
-                            }) {
-                                Image(systemName: "stop.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .padding(12)
-                                    .background(Color.white)
-                                    .cornerRadius(25)
-                            }
+                            controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .orange)
+                            controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .blue)
+                            controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .green, size: 30)
+                            controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .blue)
+                            controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
                             Spacer()
                         }
                         .padding()
                     }
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .top, endPoint: .bottom)
+                            .edgesIgnoringSafeArea(.all)
+                    )
+                    .cornerRadius(20)
+                    .shadow(radius: 10)
                 }
                 .navigationBarItems(leading:
                     Button(action: {
@@ -124,18 +86,21 @@ struct MediaView: View {
                     }) {
                         Image(systemName: isSidebarExpanded ? "chevron.left" : "sidebar.left")
                             .padding()
+                            .foregroundColor(.red)
                     },
                 trailing:
                     HStack(spacing: 20) {
                         NavigationLink(destination: SettingsView(audioPlayerManager: audioPlayerManager)) {
                             Image(systemName: "gear")
                                 .padding()
+                                .foregroundColor(.black)
                         }
                         Button(action: {
                             // Implement custom action for the star button
                         }) {
                             Image(systemName: "star.fill")
                                 .padding()
+                                .foregroundColor(.yellow)
                         }
                     }
                 )
@@ -146,6 +111,20 @@ struct MediaView: View {
             .sheet(isPresented: $audioPlayerManager.showSettings) {
                 SettingsView(audioPlayerManager: audioPlayerManager)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 20) -> some View {
+        Button(action: action) {
+            Image(systemName: iconName)
+                .resizable()
+                .frame(width: size, height: size)
+                .padding(12)
+                .background(color)
+                .foregroundColor(.white)
+                .cornerRadius(size)
+                .shadow(radius: 5)
         }
     }
 }

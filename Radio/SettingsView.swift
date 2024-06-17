@@ -23,17 +23,24 @@ struct SettingsView: View {
             }
             .pickerStyle(WheelPickerStyle())
             .padding()
+            .background(
+                LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+            )
+            .foregroundColor(.white)
 
             Button(action: {
                 audioPlayerManager.showSettings = false
             }) {
                 Text("Done")
                     .padding()
-                    .background(Color.blue)
+                    .background(Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
             .padding()
         }
+        .background(Color.black.edgesIgnoringSafeArea(.all))
     }
 }

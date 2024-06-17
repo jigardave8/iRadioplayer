@@ -15,9 +15,23 @@ struct NowPlayingView: View {
                 Text(currentSong.title ?? "Unknown Title")
                     .font(.title)
                     .padding()
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                            .cornerRadius(10)
+                            .shadow(radius: 5)
+                    )
+                    .foregroundColor(.white)
+                    .padding()
             } else {
                 Text("No song selected")
                     .font(.title)
+                    .padding()
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: [Color.gray, Color.black]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                            .cornerRadius(10)
+                            .shadow(radius: 5)
+                    )
+                    .foregroundColor(.white)
                     .padding()
             }
         }
