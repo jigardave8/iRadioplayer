@@ -4,6 +4,12 @@
 //
 //  Created by Jigar on 18/06/24.
 //
+//
+//  NowPlayingView.swift
+//  Radio
+//
+//  Created by Jigar on 18/06/24.
+//
 import SwiftUI
 import MediaPlayer
 
@@ -19,42 +25,40 @@ struct NowPlayingView: View {
                     // Album Art
                     AlbumArtView(albumArt: currentSong.artwork?.image(at: CGSize(width: 200, height: 200)))
                         .frame(width: geometry.size.width * 0.6, height: geometry.size.width * 0.6)
+                        .padding(.top, 50)
                     
                     // Song Information
-                    VStack(spacing: 10) {
-                        MarqueeText(text: currentSong.title ?? "Unknown Title", rate: 0.01)
-                            .font(.title)
+                    VStack(spacing: 8) {
+                        Text(currentSong.title ?? "Unknown Title")
+                            .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal)
-                        
-                        MarqueeText(text: currentSong.artist ?? "Unknown Artist", rate: 0.04)
+
+                        Text(currentSong.artist ?? "Unknown Artist")
                             .font(.subheadline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal)
-                        
-                        MarqueeText(text: currentSong.albumTitle ?? "Unknown Album", rate: 0.04)
+
+                        Text(currentSong.albumTitle ?? "Unknown Album")
                             .font(.footnote)
-                            .foregroundColor(.white)
+                            .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal)
                     }
-                    
+
                     // Current Time and Duration
                     HStack {
                         Text("\(formattedTime(time: currentTime))")
-                            .foregroundColor(.black) // Set text color to black
+                            .foregroundColor(.white)
                         Spacer()
                         Text("\(formattedTime(time: audioPlayerManager.currentSongDuration))")
-                            .foregroundColor(.black) // Set text color to black
+                            .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 10)
-                    
+                    .padding(.horizontal, 20)
+
                     // Playback Slider
                     Slider(value: Binding(
                         get: { currentTime },
@@ -63,7 +67,7 @@ struct NowPlayingView: View {
                             currentTime = newTime
                         }
                     ), in: 0...(audioPlayerManager.currentSongDuration ?? 1))
-                    .accentColor(.green)
+                    .accentColor(.red)
                     .padding(.horizontal)
                     .onReceive(audioPlayerManager.currentTimePublisher) { time in
                         if !isSeeking {
@@ -78,8 +82,8 @@ struct NowPlayingView: View {
                         .foregroundColor(.white)
                         .padding()
                         .background(
-                            LinearGradient(gradient: Gradient(colors: [Color.gray, Color.black]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                .cornerRadius(10)
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.6))
                                 .shadow(radius: 5)
                         )
                         .padding()
@@ -87,11 +91,9 @@ struct NowPlayingView: View {
             }
             .padding()
             .background(
-                LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
+                LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .edgesIgnoringSafeArea(.all)
             )
-            .edgesIgnoringSafeArea(.all)
             .onAppear {
                 audioPlayerManager.updateCurrentTime()
             }
@@ -128,7 +130,7 @@ struct AlbumArtView: View {
                 Image(systemName: "music.note")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .background(Color.gray)
+                    .background(Color.gray.opacity(0.5))
                     .cornerRadius(10)
                     .shadow(radius: 5)
             }
@@ -141,22 +143,21 @@ struct MarqueeText: View {
     let rate: Double // Rate of scrolling
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                Text(text)
-                    .padding(.horizontal)
-                    .lineLimit(1) // Ensure only one line is shown
-                    .minimumScaleFactor(0.3) // Adjust minimum scale factor if needed
-                    .foregroundColor(.white)
-                    .modifier(MarqueeEffect(rate: rate))
-                    .frame(height: 20) // Adjust height based on your design
-            }
+        GeometryReader { geometry in
+            Text(text)
+                .padding(.horizontal)
+                .lineLimit(1) // Ensure only one line is shown
+                .minimumScaleFactor(0.5) // Adjust minimum scale factor if needed
+                .foregroundColor(.white)
+                .modifier(MarqueeEffect(rate: rate, totalWidth: geometry.size.width))
         }
+        .frame(height: 20) // Adjust height based on your design
     }
 }
 
 struct MarqueeEffect: GeometryEffect {
     var rate: Double
+    var totalWidth: CGFloat
 
     var animatableData: Double {
         get { rate }
@@ -164,7 +165,16 @@ struct MarqueeEffect: GeometryEffect {
     }
 
     func effectValue(size: CGSize) -> ProjectionTransform {
-        let xOffset = size.width * CGFloat(rate)
-        return ProjectionTransform(CGAffineTransform(translationX: -xOffset, y: 0))
+        let offset = CGFloat(rate) * totalWidth
+        let transform = CGAffineTransform(translationX: -offset, y: 0)
+        return ProjectionTransform(transform)
+    }
+}
+
+// Preview for SwiftUI canvas
+struct NowPlayingView_Previews: PreviewProvider {
+    static var previews: some View {
+        NowPlayingView(audioPlayerManager: AudioPlayerManager())
+            .preferredColorScheme(.dark) // To better visualize the dark theme
     }
 }

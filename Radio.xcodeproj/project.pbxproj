@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B71D70B82C21046700D160D7 /* What's My Name_ (Official Music Video) ft. Drake.m4a in Resources */ = {isa = PBXBuildFile; fileRef = B71D70B72C21046700D160D7 /* What's My Name_ (Official Music Video) ft. Drake.m4a */; };
 		B73905572C205C48004ECD0B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73905562C205C46004ECD0B /* SettingsView.swift */; };
 		B73905592C205C78004ECD0B /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73905582C205C74004ECD0B /* AudioPlayerManager.swift */; };
 		B739055B2C205CB1004ECD0B /* LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B739055A2C205CAF004ECD0B /* LibraryViewModel.swift */; };
@@ -21,7 +20,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B71D70B72C21046700D160D7 /* What's My Name_ (Official Music Video) ft. Drake.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = "What's My Name_ (Official Music Video) ft. Drake.m4a"; sourceTree = "<group>"; };
 		B73905562C205C46004ECD0B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B73905582C205C74004ECD0B /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
 		B739055A2C205CAF004ECD0B /* LibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViewModel.swift; sourceTree = "<group>"; };
@@ -75,7 +73,6 @@
 				B739055A2C205CAF004ECD0B /* LibraryViewModel.swift */,
 				B739055C2C205CCD004ECD0B /* NowPlayingView.swift */,
 				B76320382ACB5AE400A1319E /* RadioView.swift */,
-				B71D70B72C21046700D160D7 /* What's My Name_ (Official Music Video) ft. Drake.m4a */,
 				B7DA1BD92AB83FF400B54B7F /* Assets.xcassets */,
 				B7DA1BDB2AB83FF400B54B7F /* Preview Content */,
 			);
@@ -148,7 +145,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B71D70B82C21046700D160D7 /* What's My Name_ (Official Music Video) ft. Drake.m4a in Resources */,
 				B7DA1BDD2AB83FF400B54B7F /* Preview Assets.xcassets in Resources */,
 				B7DA1BDA2AB83FF400B54B7F /* Assets.xcassets in Resources */,
 			);

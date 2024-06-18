@@ -5,6 +5,8 @@
 //  Created by Jigar on 17/06/24.
 //
 
+
+
 import SwiftUI
 
 struct SettingsView: View {
@@ -13,34 +15,55 @@ struct SettingsView: View {
     var body: some View {
         VStack {
             Text("Equalizer Settings")
-                .font(.headline)
-                .padding()
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(.top, 40)
+                .padding(.bottom, 20)
 
             Picker("Equalizer", selection: $audioPlayerManager.currentEqualizerSetting) {
                 ForEach(AudioPlayerManager.EqualizerSetting.allCases, id: \.self) { setting in
-                    Text(setting.rawValue).tag(setting)
+                    Text(setting.rawValue)
+                        .foregroundColor(.white)
+                        .tag(setting)
                 }
             }
             .pickerStyle(WheelPickerStyle())
-            .padding()
             .background(
-                LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                LinearGradient(gradient: Gradient(colors: [Color.gray.opacity(0.8), Color.black.opacity(0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing)
                     .cornerRadius(10)
                     .shadow(radius: 5)
             )
-            .foregroundColor(.white)
+            .padding(.horizontal, 40)
+            .padding(.bottom, 40)
+            .frame(height: 200)
 
             Button(action: {
                 audioPlayerManager.showSettings = false
             }) {
                 Text("Done")
+                    .font(.headline)
                     .padding()
-                    .background(Color.green)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.red)
                     .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .cornerRadius(10)
+                    .padding(.horizontal, 40)
+                    .shadow(radius: 5)
             }
-            .padding()
+            .padding(.bottom, 40)
         }
-        .background(Color.black.edgesIgnoringSafeArea(.all))
+        .background(
+            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .top, endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
+        )
+    }
+}
+
+// Preview for SwiftUI canvas
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView(audioPlayerManager: AudioPlayerManager())
+            .preferredColorScheme(.dark)
     }
 }

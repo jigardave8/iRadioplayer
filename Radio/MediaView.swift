@@ -5,6 +5,13 @@
 //  Created by Jigar on 03/10/23.
 //
 
+//
+//  MediaView.swift
+//  Radio
+//
+//  Created by Jigar on 03/10/23.
+//
+
 import SwiftUI
 
 struct MediaView: View {
@@ -30,16 +37,16 @@ struct MediaView: View {
                                 }) {
                                     HStack {
                                         Text(song.title ?? "Unknown Title")
-                                            .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
+                                            .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .white)
                                             .padding(8)
-                                            .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
+                                            .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow.opacity(0.3) : Color.clear)
                                             .cornerRadius(8)
                                         Spacer()
                                         if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
                                             Image(systemName: "speaker.wave.2.fill")
                                                 .foregroundColor(.green)
                                                 .padding(8)
-                                                .background(Color.gray)
+                                                .background(Color.gray.opacity(0.5))
                                                 .cornerRadius(8)
                                         }
                                     }
@@ -51,7 +58,7 @@ struct MediaView: View {
                         }
                     }
                     .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
-                    .background(Color.gray.opacity(0.1))
+                    .background(Color.black.opacity(0.9))
                     .animation(.easeInOut)
 
                     // Main Content Area
@@ -60,28 +67,21 @@ struct MediaView: View {
                         NowPlayingView(audioPlayerManager: audioPlayerManager)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .padding()
-                            .background(
-                                LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    .frame(width: geometry.size.width * 0.8, height: geometry.size.height * 0.6)
-                                    .cornerRadius(10)
-                                    .shadow(radius: 5)
-                            )
-                            .padding()
                         
                         // Music Player Controls
                         HStack(spacing: 20) {
                             Spacer()
-                            controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .orange)
-                            controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .blue)
-                            controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .green, size: 30)
-                            controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .blue)
+                            controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .white)
+                            controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .white)
+                            controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .white, size: 30)
+                            controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .white)
                             controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
                             Spacer()
                         }
                         .padding()
                     }
                     .background(
-                        LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]), startPoint: .top, endPoint: .bottom)
+                        LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .top, endPoint: .bottom)
                             .edgesIgnoringSafeArea(.all)
                     )
                     .cornerRadius(20)
@@ -95,14 +95,14 @@ struct MediaView: View {
                     }) {
                         Image(systemName: isSidebarExpanded ? "chevron.left" : "sidebar.left")
                             .padding()
-                            .foregroundColor(.red)
+                            .foregroundColor(.white)
                     },
                 trailing:
                     HStack(spacing: 20) {
                         NavigationLink(destination: SettingsView(audioPlayerManager: audioPlayerManager)) {
                             Image(systemName: "gear")
                                 .padding()
-                                .foregroundColor(.black)
+                                .foregroundColor(.white)
                         }
                         Button(action: {
                             // Implement custom action for the star button
@@ -131,7 +131,7 @@ struct MediaView: View {
                 .frame(width: size, height: size)
                 .padding(12)
                 .background(color)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .cornerRadius(size)
                 .shadow(radius: 5)
         }
