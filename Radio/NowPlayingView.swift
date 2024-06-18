@@ -23,9 +23,9 @@ struct NowPlayingView: View {
             VStack(spacing: 20) {
                 if let currentSong = getCurrentSong() {
                     // Album Art
-                    AlbumArtView(albumArt: currentSong.artwork?.image(at: CGSize(width: 200, height: 200)))
+                    AlbumArtView(albumArt: currentSong.artwork?.image(at: CGSize(width: 400, height: 250)))
                         .frame(width: geometry.size.width * 0.6, height: geometry.size.width * 0.6)
-                        .padding(.top, 50)
+                        .padding(.top, 20)
                     
                     // Song Information
                     VStack(spacing: 8) {
