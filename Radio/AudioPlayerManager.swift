@@ -127,3 +127,17 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         // This is a placeholder for actual equalizer settings implementation
     }
 }
+
+extension AudioPlayerManager {
+    var currentSong: MPMediaItem? {
+        return LibraryViewModel.shared.songs.indices.contains(currentIndex) ? LibraryViewModel.shared.songs[currentIndex] : nil
+    }
+    
+    var currentPlaybackTime: Double {
+        return audioPlayer?.currentTime ?? 0
+    }
+    
+    var currentSongDuration: Double {
+        return audioPlayer?.duration ?? 0
+    }
+}

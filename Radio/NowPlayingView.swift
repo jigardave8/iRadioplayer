@@ -5,6 +5,8 @@
 //  Created by Jigar on 18/06/24.
 //
 import SwiftUI
+import MediaPlayer
+
 
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
@@ -13,25 +15,11 @@ struct NowPlayingView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            if let currentSong = audioPlayerManager.currentIndex < LibraryViewModel.shared.songs.count ? LibraryViewModel.shared.songs[audioPlayerManager.currentIndex] : nil {
+            if let currentSong = getCurrentSong() {
+                // Album Art
+                AlbumArtView(albumArt: currentSong.artwork?.image(at: CGSize(width: 200, height: 200)))
                 
-                if let artwork = currentSong.artwork {
-                    Image(uiImage: artwork.image(at: CGSize(width: 200, height: 200))!)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
-                        .cornerRadius(10)
-                        .shadow(radius: 5)
-                } else {
-                    Image(systemName: "music.note")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
-                        .background(Color.gray)
-                        .cornerRadius(10)
-                        .shadow(radius: 5)
-                }
-                
+                // Song Information
                 VStack(spacing: 10) {
                     MarqueeText(text: currentSong.title ?? "Unknown Title", rate: 0.04)
                         .font(.title)
@@ -53,13 +41,14 @@ struct NowPlayingView: View {
                         .padding(.horizontal)
                 }
                 
+                // Playback Slider
                 Slider(value: Binding(
                     get: { currentTime },
                     set: { newTime in
                         audioPlayerManager.seek(to: newTime)
                         currentTime = newTime
                     }
-                ), in: 0...(audioPlayerManager.audioPlayer?.duration ?? 1))
+                ), in: 0...(audioPlayerManager.currentSongDuration ?? 1))
                 .accentColor(.orange)
                 .padding(.horizontal)
                 .onReceive(audioPlayerManager.currentTimePublisher) { time in
@@ -67,7 +56,6 @@ struct NowPlayingView: View {
                         currentTime = time
                     }
                 }
-                
             } else {
                 Text("No song selected")
                     .font(.title)
@@ -84,17 +72,45 @@ struct NowPlayingView: View {
         }
         .padding()
         .background(
-            GeometryReader { geometry in
-                LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
+            LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                .cornerRadius(10)
+                .shadow(radius: 5)
+        )
+        .edgesIgnoringSafeArea(.all)
+        .onAppear {
+            audioPlayerManager.updateCurrentTime()
+        }
+    }
+    
+    private func getCurrentSong() -> MPMediaItem? {
+        guard audioPlayerManager.currentIndex < LibraryViewModel.shared.songs.count else {
+            return nil
+        }
+        return LibraryViewModel.shared.songs[audioPlayerManager.currentIndex]
+    }
+}
+
+struct AlbumArtView: View {
+    var albumArt: UIImage?
+    
+    var body: some View {
+        ZStack {
+            if let albumArt = albumArt {
+                Image(uiImage: albumArt)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 200, height: 200)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+            } else {
+                Image(systemName: "music.note")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 200, height: 200)
+                    .background(Color.gray)
                     .cornerRadius(10)
                     .shadow(radius: 5)
             }
-            .edgesIgnoringSafeArea(.all)
-        )
-        .padding()
-        .onAppear {
-            audioPlayerManager.updateCurrentTime()
         }
     }
 }
