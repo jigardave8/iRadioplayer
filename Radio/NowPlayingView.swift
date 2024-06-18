@@ -33,20 +33,20 @@ struct NowPlayingView: View {
                 }
                 
                 VStack(spacing: 10) {
-                    Text(currentSong.title ?? "Unknown Title")
+                    MarqueeText(text: currentSong.title ?? "Unknown Title", rate: 0.04)
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     
-                    Text(currentSong.artist ?? "Unknown Artist")
+                    MarqueeText(text: currentSong.artist ?? "Unknown Artist", rate: 0.04)
                         .font(.subheadline)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     
-                    Text(currentSong.albumTitle ?? "Unknown Album")
+                    MarqueeText(text: currentSong.albumTitle ?? "Unknown Album", rate: 0.04)
                         .font(.footnote)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
@@ -68,10 +68,6 @@ struct NowPlayingView: View {
                     }
                 }
                 
-//                ProgressView(value: currentTime, total: audioPlayerManager.audioPlayer?.duration ?? 1)
-//                    .progressViewStyle(LinearProgressViewStyle(tint: .orange))
-//                    .padding(.horizontal)
-                
             } else {
                 Text("No song selected")
                     .font(.title)
@@ -83,10 +79,10 @@ struct NowPlayingView: View {
                             .cornerRadius(10)
                             .shadow(radius: 5)
                     )
-                    .padding(5)
+                    .padding()
             }
         }
-        .padding(2)
+        .padding()
         .background(
             GeometryReader { geometry in
                 LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -94,11 +90,44 @@ struct NowPlayingView: View {
                     .cornerRadius(10)
                     .shadow(radius: 5)
             }
-//            .edgesIgnoringSafeArea(.all)
+            .edgesIgnoringSafeArea(.all)
         )
-        .padding(5)
+        .padding()
         .onAppear {
             audioPlayerManager.updateCurrentTime()
         }
+    }
+}
+
+struct MarqueeText: View {
+    let text: String
+    let rate: Double // Rate of scrolling
+
+    var body: some View {
+        GeometryReader { geometry in
+            Text(text)
+                .padding(.horizontal)
+                .lineLimit(1) // Ensure only one line is shown
+                .minimumScaleFactor(0.5) // Adjust minimum scale factor if needed
+                .foregroundColor(.white)
+                .modifier(MarqueeEffect(rate: rate, totalWidth: geometry.size.width))
+        }
+        .frame(height: 20) // Adjust height based on your design
+    }
+}
+
+struct MarqueeEffect: GeometryEffect {
+    var rate: Double
+    var totalWidth: CGFloat
+
+    var animatableData: Double {
+        get { rate }
+        set { rate = newValue }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let offset = CGFloat(rate) * totalWidth
+        let transform = CGAffineTransform(translationX: -offset, y: 0)
+        return ProjectionTransform(transform)
     }
 }
