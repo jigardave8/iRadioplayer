@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import MediaPlayer
+import Combine
 
 class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     static let shared = AudioPlayerManager()
@@ -15,8 +16,12 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var isPlaying: Bool = false
     @Published var audioLevels: Float = 0.0
     @Published var showSettings: Bool = false
+    @Published var currentTime: TimeInterval = 0
     var audioPlayer: AVAudioPlayer?
     var currentIndex: Int = 0
+    
+    private var timer: Timer?
+    let currentTimePublisher = PassthroughSubject<TimeInterval, Never>()
 
     // Equalizer settings
     enum EqualizerSetting: String, CaseIterable {
@@ -58,9 +63,29 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
             isPlaying = true
+            startUpdatingCurrentTime()
         } catch {
             print("Failed to play audio:", error.localizedDescription)
         }
+    }
+    
+    func startUpdatingCurrentTime() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateCurrentTime()
+        }
+        timer?.fire()
+    }
+    
+    func updateCurrentTime() {
+        guard let player = audioPlayer else { return }
+        currentTime = player.currentTime
+        currentTimePublisher.send(currentTime)
+    }
+    
+    func seek(to time: TimeInterval) {
+        audioPlayer?.currentTime = time
+        currentTime = time
     }
 
     func playNext() {
@@ -80,12 +105,15 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         } else {
             audioPlayer?.play()
             isPlaying = true
+            startUpdatingCurrentTime()
         }
     }
 
     func stop() {
         audioPlayer?.stop()
         isPlaying = false
+        timer?.invalidate()
+        timer = nil
     }
 
     func shuffle() {

@@ -8,7 +8,9 @@ import SwiftUI
 
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
-    
+    @State private var currentTime: TimeInterval = 0
+    @State private var isSeeking = false
+
     var body: some View {
         VStack(spacing: 20) {
             if let currentSong = audioPlayerManager.currentIndex < LibraryViewModel.shared.songs.count ? LibraryViewModel.shared.songs[audioPlayerManager.currentIndex] : nil {
@@ -33,7 +35,6 @@ struct NowPlayingView: View {
                 VStack(spacing: 10) {
                     Text(currentSong.title ?? "Unknown Title")
                         .font(.title)
-                        .fontWidth(.standard)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
@@ -52,9 +53,24 @@ struct NowPlayingView: View {
                         .padding(.horizontal)
                 }
                 
-                ProgressView(value: audioPlayerManager.audioPlayer?.currentTime ?? 0, total: audioPlayerManager.audioPlayer?.duration ?? 1)
-                    .progressViewStyle(LinearProgressViewStyle(tint: .orange))
-                    .padding(.horizontal)
+                Slider(value: Binding(
+                    get: { currentTime },
+                    set: { newTime in
+                        audioPlayerManager.seek(to: newTime)
+                        currentTime = newTime
+                    }
+                ), in: 0...(audioPlayerManager.audioPlayer?.duration ?? 1))
+                .accentColor(.orange)
+                .padding(.horizontal)
+                .onReceive(audioPlayerManager.currentTimePublisher) { time in
+                    if !isSeeking {
+                        currentTime = time
+                    }
+                }
+                
+//                ProgressView(value: currentTime, total: audioPlayerManager.audioPlayer?.duration ?? 1)
+//                    .progressViewStyle(LinearProgressViewStyle(tint: .orange))
+//                    .padding(.horizontal)
                 
             } else {
                 Text("No song selected")
@@ -67,10 +83,10 @@ struct NowPlayingView: View {
                             .cornerRadius(10)
                             .shadow(radius: 5)
                     )
-                    .padding()
+                    .padding(5)
             }
         }
-        .padding()
+        .padding(2)
         .background(
             GeometryReader { geometry in
                 LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -78,8 +94,11 @@ struct NowPlayingView: View {
                     .cornerRadius(10)
                     .shadow(radius: 5)
             }
-            .edgesIgnoringSafeArea(.all)
+//            .edgesIgnoringSafeArea(.all)
         )
-        .padding()
+        .padding(5)
+        .onAppear {
+            audioPlayerManager.updateCurrentTime()
+        }
     }
 }
