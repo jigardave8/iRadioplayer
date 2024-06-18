@@ -22,7 +22,7 @@ struct NowPlayingView: View {
                     
                     // Song Information
                     VStack(spacing: 10) {
-                        MarqueeText(text: currentSong.title ?? "Unknown Title", rate: 0.04)
+                        MarqueeText(text: currentSong.title ?? "Unknown Title", rate: 0.01)
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -146,7 +146,7 @@ struct MarqueeText: View {
                 Text(text)
                     .padding(.horizontal)
                     .lineLimit(1) // Ensure only one line is shown
-                    .minimumScaleFactor(0.5) // Adjust minimum scale factor if needed
+                    .minimumScaleFactor(0.3) // Adjust minimum scale factor if needed
                     .foregroundColor(.white)
                     .modifier(MarqueeEffect(rate: rate))
                     .frame(height: 20) // Adjust height based on your design
