@@ -27,28 +27,31 @@ struct NowPlayingView: View {
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal)
                         
                         MarqueeText(text: currentSong.artist ?? "Unknown Artist", rate: 0.04)
                             .font(.subheadline)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal)
                         
                         MarqueeText(text: currentSong.albumTitle ?? "Unknown Album", rate: 0.04)
                             .font(.footnote)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal)
                     }
                     
                     // Current Time and Duration
                     HStack {
                         Text("\(formattedTime(time: currentTime))")
-                            .foregroundColor(.black)
+                            .foregroundColor(.black) // Set text color to black
                         Spacer()
                         Text("\(formattedTime(time: audioPlayerManager.currentSongDuration))")
-                            .foregroundColor(.black)
+                            .foregroundColor(.black) // Set text color to black
                     }
                     .padding(.horizontal, 10)
                     
@@ -138,21 +141,22 @@ struct MarqueeText: View {
     let rate: Double // Rate of scrolling
 
     var body: some View {
-        GeometryReader { geometry in
-            Text(text)
-                .padding(.horizontal)
-                .lineLimit(1) // Ensure only one line is shown
-                .minimumScaleFactor(0.5) // Adjust minimum scale factor if needed
-                .foregroundColor(.white)
-                .modifier(MarqueeEffect(rate: rate, totalWidth: geometry.size.width))
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                Text(text)
+                    .padding(.horizontal)
+                    .lineLimit(1) // Ensure only one line is shown
+                    .minimumScaleFactor(0.5) // Adjust minimum scale factor if needed
+                    .foregroundColor(.white)
+                    .modifier(MarqueeEffect(rate: rate))
+                    .frame(height: 20) // Adjust height based on your design
+            }
         }
-        .frame(height: 20) // Adjust height based on your design
     }
 }
 
 struct MarqueeEffect: GeometryEffect {
     var rate: Double
-    var totalWidth: CGFloat
 
     var animatableData: Double {
         get { rate }
@@ -160,8 +164,7 @@ struct MarqueeEffect: GeometryEffect {
     }
 
     func effectValue(size: CGSize) -> ProjectionTransform {
-        let offset = CGFloat(rate) * totalWidth
-        let transform = CGAffineTransform(translationX: -offset, y: 0)
-        return ProjectionTransform(transform)
+        let xOffset = size.width * CGFloat(rate)
+        return ProjectionTransform(CGAffineTransform(translationX: -xOffset, y: 0))
     }
 }
