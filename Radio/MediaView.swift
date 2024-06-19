@@ -59,7 +59,7 @@ struct MediaView: View {
                     }
                     .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
                     .background(Color.black.opacity(0.9))
-                    .animation(.snappy)
+                    .animation(.easeInOut)
 
                     // Main Content Area
                     VStack {
