@@ -4,6 +4,12 @@
 ////
 ////  Created by Jigar on 03/10/23.
 ////
+////
+//  CombinedView.swift
+//  Radio
+//
+//  Created by Jigar on 03/10/23.
+//
 
 import SwiftUI
 import AVFoundation
@@ -17,7 +23,6 @@ class LibraryViewModel: ObservableObject {
 
     @Published var songs: [MPMediaItem] = []
     @Published var selectedSong: MPMediaItem?
-    
 
     func fetchSongs() {
         let query = MPMediaQuery.songs()
@@ -25,6 +30,7 @@ class LibraryViewModel: ObservableObject {
             songs = items
         }
     }
+
     func filteredSongs(searchText: String) -> [MPMediaItem] {
         if searchText.isEmpty {
             return songs
@@ -278,256 +284,154 @@ struct MediaView: View {
                             .edgesIgnoringSafeArea(.all)
                     }
                 }
-                .navigationBarItems(leading:
-                    Button(action: {
-                        withAnimation {
-                            self.isSidebarExpanded.toggle()
-                        }
-                    }) {
-                        Image(systemName: isSidebarExpanded ? "chevron.left" : "sidebar.left")
-                            .padding()
-                            .foregroundColor(.red)
-                    },
-                trailing:
-                    HStack(spacing: 20) {
-                        NavigationLink(destination: SettingsView(audioPlayerManager: audioPlayerManager)) {
-                            Image(systemName: "gear")
-                                .padding()
-                                .foregroundColor(.black)
-                        }
-                        Button(action: {
-                            // Implement custom action for the star button
-                        }) {
-                            Image(systemName: "star.fill")
-                                .padding()
-                                .foregroundColor(.yellow)
-                        }
-                    }
-                )
-                .onAppear {
-                    audioPlayerManager.setupAudioSession()
-                }
-                .sheet(isPresented: $audioPlayerManager.showSettings) {
-                    SettingsView(audioPlayerManager: audioPlayerManager)
-                }
             }
+            .navigationBarTitle("Radio Player")
+            .navigationBarItems(leading: Button(action: {
+                withAnimation {
+                    isSidebarExpanded.toggle()
+                }
+            }) {
+                Image(systemName: "line.horizontal.3")
+                    .imageScale(.large)
+                    .padding()
+            }, trailing: Button(action: {
+                audioPlayerManager.showSettings.toggle()
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .imageScale(.large)
+                    .padding()
+            })
+        }
+        .sheet(isPresented: $audioPlayerManager.showSettings) {
+            SettingsView(audioPlayerManager: audioPlayerManager)
         }
     }
 
-    @ViewBuilder
-    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 20) -> some View {
+    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 24) -> some View {
         Button(action: action) {
             Image(systemName: iconName)
                 .resizable()
+                .scaledToFit()
                 .frame(width: size, height: size)
-                .padding(12)
-                .background(color)
-                .foregroundColor(.white)
-                .cornerRadius(size)
-                .shadow(radius: 5)
+                .foregroundColor(color)
         }
     }
 }
-
-// Search Bar Component
-struct SearchBar: View {
-    @Binding var text: String
-    @Binding var isSearching: Bool
-
-    var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
-            TextField("Search", text: $text, onCommit: {
-                // Handle search on commit if needed
-            })
-            .padding(.vertical, 10)
-            .padding(.horizontal, 20)
-            .background(Color(.systemGray6))
-            .cornerRadius(20)
-            .overlay(
-                HStack {
-                    Spacer()
-                    if !text.isEmpty {
-                        Button(action: {
-                            text = ""
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
-                                .padding(.trailing, 10)
-                        }
-                    }
-                }
-            )
-        }
-        .padding(.horizontal)
-    }
-}
-
 
 // MARK: - NowPlayingView
 
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
     @State private var currentTime: TimeInterval = 0
-    @State private var isSeeking = false
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 20) {
-                if let currentSong = getCurrentSong() {
-                    // Album Art
-                    AlbumArtView(albumArt: currentSong.artwork?.image(at: CGSize(width: 200, height: 200)))
-                        .frame(width: geometry.size.width * 0.6, height: geometry.size.width * 0.6)
+        VStack {
+            if let currentSong = audioPlayerManager.currentSong {
+                Text(currentSong.title ?? "Unknown Title")
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                    .padding()
+                Text(currentSong.artist ?? "Unknown Artist")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding()
+            } else {
+                Text("No Song Playing")
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                    .padding()
+            }
 
-                    // Song Information
-                    VStack(spacing: 10) {
-                        MarqueeText(text: currentSong.title ?? "Unknown Title", rate: 0.04)
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+            Slider(value: Binding(
+                get: { audioPlayerManager.currentPlaybackTime },
+                set: { newTime in audioPlayerManager.seek(to: newTime) }
+            ), in: 0...audioPlayerManager.currentSongDuration)
+                .accentColor(.white)
+                .padding()
+        }
+    }
+}
 
-                        MarqueeText(text: currentSong.artist ?? "Unknown Artist", rate: 0.04)
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+// MARK: - SettingsView
 
-                        MarqueeText(text: currentSong.albumTitle ?? "Unknown Album", rate: 0.04)
-                            .font(.footnote)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
+struct SettingsView: View {
+    @ObservedObject var audioPlayerManager: AudioPlayerManager
 
-                    // Current Time and Duration
-                    HStack {
-                        Text("\(formattedTime(time: currentTime))")
-                            .foregroundColor(.black)
-                        Spacer()
-                        Text("\(formattedTime(time: audioPlayerManager.currentSongDuration))")
-                            .foregroundColor(.black)
-                    }
-                    .padding(.horizontal, 10)
-
-                    // Playback Slider
-                    Slider(value: Binding(
-                        get: { currentTime },
-                        set: { newTime in
-                            audioPlayerManager.seek(to: newTime)
-                            currentTime = newTime
-                        }
-                    ), in: 0...(audioPlayerManager.currentSongDuration ?? 1))
-                    .accentColor(.green)
-                    .padding(.horizontal)
-                    .onReceive(audioPlayerManager.currentTimePublisher) { time in
-                        if !isSeeking {
-                            currentTime = time
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Equalizer Settings")) {
+                    Picker("Equalizer", selection: $audioPlayerManager.currentEqualizerSetting) {
+                        ForEach(AudioPlayerManager.EqualizerSetting.allCases, id: \.self) { setting in
+                            Text(setting.rawValue).tag(setting)
                         }
                     }
-                } else {
-                    // Placeholder when no song is selected
-                    Text("No song selected")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(
-                            LinearGradient(gradient: Gradient(colors: [Color.gray, Color.black]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                .cornerRadius(10)
-                                .shadow(radius: 5)
-                        )
-                        .padding()
+                    .pickerStyle(MenuPickerStyle())
                 }
             }
-            .padding()
-            .background(
-                LinearGradient(gradient: Gradient(colors: [Color.orange, Color.pink]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
-            )
-            .edgesIgnoringSafeArea(.all)
-            .onAppear {
-                audioPlayerManager.updateCurrentTime()
-            }
-        }
-    }
-
-    private func getCurrentSong() -> MPMediaItem? {
-        guard audioPlayerManager.currentIndex < LibraryViewModel.shared.songs.count else {
-            return nil
-        }
-        return LibraryViewModel.shared.songs[audioPlayerManager.currentIndex]
-    }
-
-    private func formattedTime(time: Double) -> String {
-        let interval = Int(time)
-        let minutes = interval / 60
-        let seconds = interval % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-}
-
-// MARK: - AlbumArtView
-
-struct AlbumArtView: View {
-    var albumArt: UIImage?
-
-    var body: some View {
-        ZStack {
-            if let albumArt = albumArt {
-                Image(uiImage: albumArt)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
-            } else {
-                Image(systemName: "music.note")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .background(Color.gray)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
-            }
+            .navigationBarTitle("Settings")
+            .navigationBarItems(trailing: Button("Done") {
+                audioPlayerManager.showSettings = false
+            })
         }
     }
 }
 
-// MARK: - MarqueeText
+// MARK: - SearchBar
 
-struct MarqueeText: View {
-    let text: String
-    let rate: Double // Rate of scrolling
+struct SearchBar: UIViewRepresentable {
+    @Binding var text: String
+    @Binding var isSearching: Bool
 
-    var body: some View {
-        GeometryReader { geometry in
-            Text(text)
-                .padding(.horizontal)
-                .lineLimit(1) // Ensure only one line is shown
-                .minimumScaleFactor(0.5) // Adjust minimum scale factor if needed
-                .foregroundColor(.white)
-                .modifier(MarqueeEffect(rate: rate, totalWidth: geometry.size.width))
+    class Coordinator: NSObject, UISearchBarDelegate {
+        @Binding var text: String
+        @Binding var isSearching: Bool
+
+        init(text: Binding<String>, isSearching: Binding<Bool>) {
+            _text = text
+            _isSearching = isSearching
         }
-        .frame(height: 20) // Adjust height based on your design
+
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            text = searchText
+        }
+
+        func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+            isSearching = true
+        }
+
+        func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+            isSearching = false
+        }
+
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+            isSearching = false
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(text: $text, isSearching: $isSearching)
+    }
+
+    func makeUIView(context: Context) -> UISearchBar {
+        let searchBar = UISearchBar(frame: .zero)
+        searchBar.delegate = context.coordinator
+        searchBar.autocapitalizationType = .none
+        searchBar.searchBarStyle = .minimal
+        searchBar.placeholder = "Search songs, artists, albums"
+        return searchBar
+    }
+
+    func updateUIView(_ uiView: UISearchBar, context: Context) {
+        uiView.text = text
     }
 }
 
-// MARK: - MarqueeEffect
+// MARK: - Preview
 
-struct MarqueeEffect: GeometryEffect {
-    var rate: Double
-    var totalWidth: CGFloat
-
-    var animatableData: Double {
-        get { rate }
-        set { rate = newValue }
-    }
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        let offset = CGFloat(rate) * totalWidth
-        let transform = CGAffineTransform(translationX: -offset, y: 0)
-        return ProjectionTransform(transform)
+struct CombinedView_Previews: PreviewProvider {
+    static var previews: some View {
+        MediaView()
     }
 }
