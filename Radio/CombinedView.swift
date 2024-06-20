@@ -5,13 +5,6 @@
 ////  Created by Jigar on 03/10/23.
 ////
 
-//
-//  CombinedView.swift
-//  Radio
-//
-//  Created by Jigar on 03/10/23.
-//
-
 import SwiftUI
 import AVFoundation
 import MediaPlayer
@@ -24,11 +17,24 @@ class LibraryViewModel: ObservableObject {
 
     @Published var songs: [MPMediaItem] = []
     @Published var selectedSong: MPMediaItem?
+    
 
     func fetchSongs() {
         let query = MPMediaQuery.songs()
         if let items = query.items {
             songs = items
+        }
+    }
+    func filteredSongs(searchText: String) -> [MPMediaItem] {
+        if searchText.isEmpty {
+            return songs
+        } else {
+            return songs.filter { song in
+                let searchLowercased = searchText.lowercased()
+                return song.title?.lowercased().contains(searchLowercased) == true ||
+                song.artist?.lowercased().contains(searchLowercased) == true ||
+                song.albumTitle?.lowercased().contains(searchLowercased) == true
+            }
         }
     }
 }
@@ -167,12 +173,6 @@ extension AudioPlayerManager {
     }
 }
 
-// MARK: - MediaViewModel (Assuming it's adjusted to inherit from NSObject)
-
-class MediaViewModel: NSObject, ObservableObject {
-    // Additional functionality for MediaViewModel can be added here
-}
-
 // MARK: - MediaView
 
 struct MediaView: View {
@@ -180,80 +180,103 @@ struct MediaView: View {
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
 
     @State private var isSidebarExpanded = false
+    @State private var searchText = ""
+    @State private var isSearching = false // Track if the user is actively searching
 
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                HStack(spacing: 0) {
-                    // Side Panel (Collapsible)
-                    VStack {
-                        Text("Media Library")
-                            .font(.headline)
-                            .padding()
-                        List {
-                            ForEach(libraryViewModel.songs, id: \.persistentID) { song in
-                                Button(action: {
-                                    libraryViewModel.selectedSong = song
-                                    audioPlayerManager.play(song: song)
-                                }) {
-                                    HStack {
-                                        Text(song.title ?? "Unknown Title")
-                                            .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
-                                            .padding(8)
-                                            .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
-                                            .cornerRadius(8)
-                                        Spacer()
-                                        if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
-                                            Image(systemName: "speaker.wave.2.fill")
-                                                .foregroundColor(.green)
+                ZStack { // Use ZStack to handle taps outside the search bar
+                    HStack(spacing: 0) {
+                        // Side Panel (Collapsible)
+                        VStack {
+                            Text("Media Library")
+                                .font(.headline)
+                                .padding()
+
+                            // Search Bar
+                            SearchBar(text: $searchText, isSearching: $isSearching)
+                                .padding(.horizontal)
+                                .onTapGesture {
+                                    isSearching = true // Tap on search bar starts searching
+                                }
+
+                            List {
+                                ForEach(libraryViewModel.filteredSongs(searchText: searchText), id: \.persistentID) { song in
+                                    Button(action: {
+                                        libraryViewModel.selectedSong = song
+                                        audioPlayerManager.play(song: song)
+                                    }) {
+                                        HStack {
+                                            Text(song.title ?? "Unknown Title")
+                                                .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
                                                 .padding(8)
-                                                .background(Color.gray)
+                                                .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
                                                 .cornerRadius(8)
+                                            Spacer()
+                                            if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
+                                                Image(systemName: "speaker.wave.2.fill")
+                                                    .foregroundColor(.green)
+                                                    .padding(8)
+                                                    .background(Color.gray)
+                                                    .cornerRadius(8)
+                                            }
                                         }
                                     }
                                 }
                             }
+                            .onAppear {
+                                libraryViewModel.fetchSongs()
+                            }
                         }
-                        .onAppear {
-                            libraryViewModel.fetchSongs()
-                        }
-                    }
-                    .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
-                    .background(Color.gray.opacity(0.1))
-                    .animation(.easeInOut)
+                        .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
+                        .background(Color.gray.opacity(0.1))
+                        .animation(.easeInOut)
 
-                    // Main Content Area
-                    VStack {
-                        // Now Playing View
-                        NowPlayingView(audioPlayerManager: audioPlayerManager)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding()
-                            .background(
-                                LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    .frame(width: geometry.size.width * 0.8, height: geometry.size.height * 0.6)
-                                    .cornerRadius(10)
-                                    .shadow(radius: 5)
-                            )
-                            .padding()
+                        // Main Content Area
+                        VStack {
+                            // Now Playing View
+                            NowPlayingView(audioPlayerManager: audioPlayerManager)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding()
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        .frame(width: geometry.size.width * 0.8, height: geometry.size.height * 0.6)
+                                        .cornerRadius(10)
+                                        .shadow(radius: 5)
+                                )
+                                .padding()
 
-                        // Music Player Controls
-                        HStack(spacing: 20) {
-                            Spacer()
-                            controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
-                            controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
-                            controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 30)
-                            controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
-                            controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
-                            Spacer()
+                            // Music Player Controls
+                            HStack(spacing: 20) {
+                                Spacer()
+                                controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
+                                controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
+                                controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 30)
+                                controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
+                                controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
+                                Spacer()
+                            }
+                            .padding()
                         }
-                        .padding()
+                        .background(
+                            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .top, endPoint: .bottom)
+                                .edgesIgnoringSafeArea(.all)
+                        )
+                        .cornerRadius(20)
+                        .shadow(radius: 10)
                     }
-                    .background(
-                        LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .top, endPoint: .bottom)
+
+                    // Invisible view to handle taps outside the search bar
+                    if isSearching {
+                        Color.clear
+                            .onTapGesture {
+                                // Dismiss keyboard when tapping outside the search bar
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                isSearching = false
+                            }
                             .edgesIgnoringSafeArea(.all)
-                    )
-                    .cornerRadius(20)
-                    .shadow(radius: 10)
+                    }
                 }
                 .navigationBarItems(leading:
                     Button(action: {
@@ -281,12 +304,12 @@ struct MediaView: View {
                         }
                     }
                 )
-            }
-            .onAppear {
-                audioPlayerManager.setupAudioSession()
-            }
-            .sheet(isPresented: $audioPlayerManager.showSettings) {
-                SettingsView(audioPlayerManager: audioPlayerManager)
+                .onAppear {
+                    audioPlayerManager.setupAudioSession()
+                }
+                .sheet(isPresented: $audioPlayerManager.showSettings) {
+                    SettingsView(audioPlayerManager: audioPlayerManager)
+                }
             }
         }
     }
@@ -305,6 +328,42 @@ struct MediaView: View {
         }
     }
 }
+
+// Search Bar Component
+struct SearchBar: View {
+    @Binding var text: String
+    @Binding var isSearching: Bool
+
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            TextField("Search", text: $text, onCommit: {
+                // Handle search on commit if needed
+            })
+            .padding(.vertical, 10)
+            .padding(.horizontal, 20)
+            .background(Color(.systemGray6))
+            .cornerRadius(20)
+            .overlay(
+                HStack {
+                    Spacer()
+                    if !text.isEmpty {
+                        Button(action: {
+                            text = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 10)
+                        }
+                    }
+                }
+            )
+        }
+        .padding(.horizontal)
+    }
+}
+
 
 // MARK: - NowPlayingView
 
@@ -360,7 +419,7 @@ struct NowPlayingView: View {
                             audioPlayerManager.seek(to: newTime)
                             currentTime = newTime
                         }
-                    ), in: 0...(audioPlayerManager.currentSongDuration))
+                    ), in: 0...(audioPlayerManager.currentSongDuration ?? 1))
                     .accentColor(.green)
                     .padding(.horizontal)
                     .onReceive(audioPlayerManager.currentTimePublisher) { time in
@@ -472,4 +531,3 @@ struct MarqueeEffect: GeometryEffect {
         return ProjectionTransform(transform)
     }
 }
-
