@@ -71,7 +71,7 @@ struct MediaView: View {
                         }
                         .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
                         .background(Color.gray.opacity(0.1))
-                        .animation(.easeInOut)
+                        .animation(.linear)
 
                         // Main Content Area
                         VStack {
