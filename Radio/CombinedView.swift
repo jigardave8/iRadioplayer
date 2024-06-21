@@ -166,6 +166,8 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
 // MARK: - MediaView
 
+
+
 struct MediaView: View {
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
@@ -173,6 +175,26 @@ struct MediaView: View {
     @State private var isSidebarExpanded = false
     @State private var searchText = ""
     @State private var isSearching = false // Track if the user is actively searching
+    @State private var currentGradientIndex = 0 // Track the current gradient index
+    @State private var useDedicatedGradient = false // Track if the dedicated gradient is used
+
+    // Define different gradients
+    private let gradients: [[Color]] = [
+        [Color(red: 0.00, green: 0.25, blue: 0.50), Color(red: 1.00, green: 0.60, blue: 0.40)], // Ocean Sunset
+        [Color(red: 0.30, green: 0.00, blue: 0.50), Color(red: 0.70, green: 0.20, blue: 0.80)], // Purple Haze
+        [Color(red: 0.10, green: 0.40, blue: 0.30), Color(red: 0.00, green: 0.20, blue: 0.10)], // Mystic Forest
+        [Color(red: 0.80, green: 0.60, blue: 0.00), Color(red: 1.00, green: 0.90, blue: 0.50)], // Golden Hour
+        [Color(red: 1.00, green: 0.80, blue: 0.00), Color(red: 1.00, green: 0.30, blue: 0.30)], // Electric Sunrise
+        [Color(red: 0.10, green: 0.00, blue: 0.30), Color(red: 0.10, green: 0.10, blue: 0.50)], // Midnight Aurora
+        [Color(red: 0.90, green: 0.60, blue: 0.80), Color(red: 0.70, green: 0.80, blue: 0.95)], // Cotton Candy
+        [Color(red: 0.90, green: 0.00, blue: 0.80), Color(red: 0.30, green: 1.00, blue: 0.50)], // Neon Lights
+        [Color(red: 1.00, green: 0.60, blue: 0.80), Color(red: 0.95, green: 0.80, blue: 0.90)], // Cherry Blossom
+        [Color(red: 0.00, green: 0.50, blue: 0.30), Color(red: 0.00, green: 0.80, blue: 0.50)]  // Emerald Isle
+    ]
+
+    // Define dedicated gradients
+    private let dedicatedGradient = [Color.black, Color.gray]
+    private let lightGradient = [Color.white, Color.gray.opacity(0.5)]
 
     var body: some View {
         NavigationView {
@@ -185,7 +207,6 @@ struct MediaView: View {
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .padding(2)
-                                
 
                             // Search Bar
                             SearchBar(text: $searchText, isSearching: $isSearching)
@@ -233,7 +254,7 @@ struct MediaView: View {
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding()
                                 .background(
-                                    LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    LinearGradient(gradient: Gradient(colors: useDedicatedGradient ? (currentGradientIndex == 0 ? dedicatedGradient : lightGradient) : gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
                                         .cornerRadius(10)
                                         .shadow(radius: 5)
                                 )
@@ -241,18 +262,32 @@ struct MediaView: View {
 
                             // Music Player Controls
                             HStack(spacing: 20) {
-                                Spacer()
+                                
                                 controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
                                 controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
                                 controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 40)
                                 controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
                                 controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
-                                Spacer()
+//                                Spacer()
+
+                                // Button to change gradient
+                                controlButton(iconName: "paintbrush.fill", action: {
+                                    useDedicatedGradient = false
+                                    currentGradientIndex = (currentGradientIndex + 1) % gradients.count
+                                }, color: .blue)
+
+                                // Button to toggle dedicated gradient
+                                controlButton(iconName: "circle.lefthalf.fill", action: {
+                                    useDedicatedGradient.toggle()
+                                    currentGradientIndex = 0 // Reset index to use the dedicated gradient
+                                }, color: .purple)
+                                
+
                             }
                             .padding()
                         }
                         .background(
-                            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                            LinearGradient(gradient: Gradient(colors: useDedicatedGradient ? (currentGradientIndex == 0 ? dedicatedGradient : lightGradient) : gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
                                 .edgesIgnoringSafeArea(.all)
                         )
                     }
@@ -269,7 +304,7 @@ struct MediaView: View {
                     }
                 }
             }
-//            .navigationBarTitle("Music Player", displayMode: .automatic)
+            //            .navigationBarTitle("Music Player", displayMode: .automatic)
             .navigationBarItems(leading: Button(action: {
                 withAnimation {
                     isSidebarExpanded.toggle()
@@ -296,6 +331,7 @@ struct MediaView: View {
     }
 }
 
+
 // MARK: - NowPlayingView
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
@@ -303,6 +339,7 @@ struct NowPlayingView: View {
 
     var body: some View {
         VStack {
+           
             if let song = audioPlayerManager.currentSong {
                 Text(song.title ?? "Unknown Title")
                     .font(.title2)
@@ -418,6 +455,7 @@ struct FullScreenView: View {
             Text("Album: \(song.albumTitle ?? "Unknown Album")")
                 .foregroundColor(.white)
                 .padding(.bottom, 10)
+            
 
             Text("Duration: \(timeString(time: song.playbackDuration))")
                 .foregroundColor(.white)
