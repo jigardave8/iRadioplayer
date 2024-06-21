@@ -182,8 +182,10 @@ struct MediaView: View {
                         // Side Panel (Collapsible)
                         VStack {
                             Text("Media Library")
-                                .font(.headline)
-                                .padding()
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .padding(2)
+                                
 
                             // Search Bar
                             SearchBar(text: $searchText, isSearching: $isSearching)
@@ -267,7 +269,7 @@ struct MediaView: View {
                     }
                 }
             }
-            .navigationBarTitle("Music Player", displayMode: .inline)
+//            .navigationBarTitle("Music Player", displayMode: .automatic)
             .navigationBarItems(leading: Button(action: {
                 withAnimation {
                     isSidebarExpanded.toggle()
@@ -297,48 +299,149 @@ struct MediaView: View {
 // MARK: - NowPlayingView
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
+    @State private var isFullScreen = false // State to manage full-screen mode
 
     var body: some View {
         VStack {
             if let song = audioPlayerManager.currentSong {
                 Text(song.title ?? "Unknown Title")
-                    .font(.title)
+                    .font(.title2)
                     .foregroundColor(.white)
-                    .padding(.bottom, 5)
+                    .padding(.bottom, 4)
 
                 Text(song.artist ?? "Unknown Artist")
-                    .font(.headline)
+                    .font(.title3)
                     .foregroundColor(.gray)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 4)
+                
+                Text(song.albumTitle ?? "Unknown Album")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 4)
 
-                if let artwork = song.artwork {
-                    Image(uiImage: artwork.image(at: CGSize(width: 200, height: 200)) ?? UIImage(systemName: "music.note")!)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
-                        .padding(.bottom, 20)
-                } else {
-                    Image(systemName: "music.note")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
-                        .padding(.bottom, 20)
+                ZStack {
+                    if let artwork = song.artwork {
+                        Image(uiImage: artwork.image(at: CGSize(width: 50, height: 50)) ?? UIImage(systemName: "music.note")!)
+                            .fixedSize()
+//                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 250, height: 200)
+                            .padding(.bottom, 10)
+                            .onTapGesture {
+                                isFullScreen.toggle()
+                            }
+                            .cornerRadius(10)
+                    } else {
+                        Image(systemName: "music.note")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 250, height: 200)
+                            .padding(.bottom, 10)
+                            .cornerRadius(10)
+                    }
+
+                    // Full-screen overlay
+                    if isFullScreen {
+                        FullScreenView(song: song)
+                            .onTapGesture {
+                                isFullScreen.toggle()
+                            }
+                    }
                 }
 
-                Slider(value: Binding(get: {
-                    self.audioPlayerManager.currentPlaybackTime
-                }, set: { (newTime) in
-                    self.audioPlayerManager.seek(to: newTime)
-                }), in: 0...self.audioPlayerManager.currentSongDuration)
-                .accentColor(.green)
+                HStack {
+                    Text(timeString(time: audioPlayerManager.currentPlaybackTime))
+                        .foregroundColor(.white)
+                    Slider(value: Binding(get: {
+                        self.audioPlayerManager.currentPlaybackTime
+                    }, set: { (newTime) in
+                        self.audioPlayerManager.seek(to: newTime)
+                    }), in: 0...self.audioPlayerManager.currentSongDuration)
+                    .accentColor(.green)
+                    Text("-\(timeString(time: audioPlayerManager.currentSongDuration - audioPlayerManager.currentPlaybackTime))")
+                        .foregroundColor(.white)
+                }
+                .padding(.vertical, 4)
 
             } else {
                 Text("No song is currently playing.")
                     .font(.title)
                     .foregroundColor(.white)
-                    .padding(.bottom, 5)
+                    .padding(.bottom, 2)
             }
         }
+        .sheet(isPresented: $isFullScreen, content: {
+            if let song = audioPlayerManager.currentSong {
+                FullScreenView(song: song)
+            }
+        })
+        .padding(.horizontal, 24)
+        .padding(.top, 2)
+    }
+
+    // Helper function to format time duration
+    private func timeString(time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+}
+
+// Full screen view to display song details
+struct FullScreenView: View {
+    var song: MPMediaItem
+
+    var body: some View {
+        VStack {
+            Text(song.title ?? "Unknown Title")
+                .font(.title)
+                .foregroundColor(.white)
+                .padding()
+
+            if let artwork = song.artwork {
+                Image(uiImage: artwork.image(at: CGSize(width: 300, height: 300)) ?? UIImage(systemName: "music.note")!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 300, height: 300)
+                    .cornerRadius(15)
+                    .shadow(radius: 10)
+                    .padding()
+            } else {
+                Image(systemName: "music.note")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 300, height: 300)
+                    .cornerRadius(15)
+                    .shadow(radius: 10)
+                    .padding()
+            }
+
+            Text("Artist: \(song.artist ?? "Unknown Artist")")
+                .foregroundColor(.white)
+                .padding(.bottom, 10)
+
+            Text("Album: \(song.albumTitle ?? "Unknown Album")")
+                .foregroundColor(.white)
+                .padding(.bottom, 10)
+
+            Text("Duration: \(timeString(time: song.playbackDuration))")
+                .foregroundColor(.white)
+                .padding(.bottom, 10)
+
+            Text("Genre: \(song.genre ?? "Unknown Genre")")
+                .foregroundColor(.white)
+                .padding(.bottom, 10)
+
+            Spacer()
+        }
+        .background(Color.black)
+        .edgesIgnoringSafeArea(.all)
+    }
+
+    // Helper function to format time duration
+    private func timeString(time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 
