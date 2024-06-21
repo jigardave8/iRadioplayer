@@ -166,8 +166,6 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
 // MARK: - MediaView
 
-
-
 struct MediaView: View {
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
@@ -177,6 +175,7 @@ struct MediaView: View {
     @State private var isSearching = false // Track if the user is actively searching
     @State private var currentGradientIndex = 0 // Track the current gradient index
     @State private var useDedicatedGradient = false // Track if the dedicated gradient is used
+    @State private var animationPhase = 0.0 // Phase for the animation
 
     // Define different gradients
     private let gradients: [[Color]] = [
@@ -195,6 +194,7 @@ struct MediaView: View {
     // Define dedicated gradients
     private let dedicatedGradient = [Color.black, Color.gray]
     private let lightGradient = [Color.white, Color.gray.opacity(0.5)]
+
 
     var body: some View {
         NavigationView {
@@ -268,7 +268,6 @@ struct MediaView: View {
                                 controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 40)
                                 controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
                                 controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
-//                                Spacer()
 
                                 // Button to change gradient
                                 controlButton(iconName: "paintbrush.fill", action: {
@@ -287,8 +286,19 @@ struct MediaView: View {
                             .padding()
                         }
                         .background(
-                            LinearGradient(gradient: Gradient(colors: useDedicatedGradient ? (currentGradientIndex == 0 ? dedicatedGradient : lightGradient) : gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                .edgesIgnoringSafeArea(.all)
+                            ZStack {
+                                if useDedicatedGradient {
+                                    AngularGradient(gradient: Gradient(colors: [Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.purple, Color.red]), center: .center, angle: .degrees(animationPhase))
+                                        .opacity(0.5)
+                                        .animation(Animation.linear(duration: 2).repeatForever(autoreverses: false), value: animationPhase)
+                                        .onAppear {
+                                            animationPhase += 360
+                                        }
+                                } else {
+                                    LinearGradient(gradient: Gradient(colors: gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        .edgesIgnoringSafeArea(.all)
+                                }
+                            }
                         )
                     }
 
@@ -304,7 +314,6 @@ struct MediaView: View {
                     }
                 }
             }
-            //            .navigationBarTitle("Music Player", displayMode: .automatic)
             .navigationBarItems(leading: Button(action: {
                 withAnimation {
                     isSidebarExpanded.toggle()
