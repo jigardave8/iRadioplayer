@@ -1,16 +1,3 @@
-////
-////  CombinedView.swift
-////  Radio
-////
-////  Created by Jigar on 03/10/23.
-////
-////
-//  CombinedView.swift
-//  Radio
-//
-//  Created by Jigar on 03/10/23.
-//
-
 import SwiftUI
 import AVFoundation
 import MediaPlayer
@@ -30,7 +17,7 @@ class LibraryViewModel: ObservableObject {
             songs = items
         }
     }
-
+    
     func filteredSongs(searchText: String) -> [MPMediaItem] {
         if searchText.isEmpty {
             return songs
@@ -54,6 +41,8 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var audioLevels: Float = 0.0
     @Published var showSettings: Bool = false
     @Published var currentTime: TimeInterval = 0
+    @Published var currentSong: MPMediaItem?
+
     var audioPlayer: AVAudioPlayer?
     var currentIndex: Int = 0
 
@@ -100,6 +89,8 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
             isPlaying = true
+            currentSong = song // Update the current song
+            LibraryViewModel.shared.selectedSong = song // Update the selected song in the view model
             startUpdatingCurrentTime()
         } catch {
             print("Failed to play audio:", error.localizedDescription)
@@ -162,12 +153,6 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func applyEqualizerSetting() {
         // Apply equalizer settings using AVAudioEngine and AVAudioUnitEQ
         // This is a placeholder for actual equalizer settings implementation
-    }
-}
-
-extension AudioPlayerManager {
-    var currentSong: MPMediaItem? {
-        return LibraryViewModel.shared.songs.indices.contains(currentIndex) ? LibraryViewModel.shared.songs[currentIndex] : nil
     }
 
     var currentPlaybackTime: Double {
@@ -247,7 +232,6 @@ struct MediaView: View {
                                 .padding()
                                 .background(
                                     LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                        .frame(width: geometry.size.width * 0.8, height: geometry.size.height * 0.6)
                                         .cornerRadius(10)
                                         .shadow(radius: 5)
                                 )
@@ -258,7 +242,7 @@ struct MediaView: View {
                                 Spacer()
                                 controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
                                 controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
-                                controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 30)
+                                controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 40)
                                 controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
                                 controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
                                 Spacer()
@@ -266,26 +250,24 @@ struct MediaView: View {
                             .padding()
                         }
                         .background(
-                            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .top, endPoint: .bottom)
+                            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .topLeading, endPoint: .bottomTrailing)
                                 .edgesIgnoringSafeArea(.all)
                         )
-                        .cornerRadius(20)
-                        .shadow(radius: 10)
                     }
 
-                    // Invisible view to handle taps outside the search bar
+                    // Dismiss the search view by tapping outside the search bar
                     if isSearching {
-                        Color.clear
-                            .onTapGesture {
-                                // Dismiss keyboard when tapping outside the search bar
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                isSearching = false
-                            }
+                        Color.black.opacity(0.4)
                             .edgesIgnoringSafeArea(.all)
+                            .onTapGesture {
+                                isSearching = false
+                                searchText = "" // Clear search text when dismissed
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) // Dismiss keyboard
+                            }
                     }
                 }
             }
-            .navigationBarTitle("Radio Player")
+            .navigationBarTitle("Music Player", displayMode: .inline)
             .navigationBarItems(leading: Button(action: {
                 withAnimation {
                     isSidebarExpanded.toggle()
@@ -293,25 +275,19 @@ struct MediaView: View {
             }) {
                 Image(systemName: "line.horizontal.3")
                     .imageScale(.large)
-                    .padding()
-            }, trailing: Button(action: {
-                audioPlayerManager.showSettings.toggle()
-            }) {
-                Image(systemName: "gearshape.fill")
-                    .imageScale(.large)
-                    .padding()
             })
-        }
-        .sheet(isPresented: $audioPlayerManager.showSettings) {
-            SettingsView(audioPlayerManager: audioPlayerManager)
+            .onAppear {
+                libraryViewModel.fetchSongs()
+                audioPlayerManager.setupAudioSession()
+            }
         }
     }
 
-    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 24) -> some View {
+    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 30) -> some View {
         Button(action: action) {
             Image(systemName: iconName)
                 .resizable()
-                .scaledToFit()
+                .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
                 .foregroundColor(color)
         }
@@ -322,57 +298,41 @@ struct MediaView: View {
 
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
-    @State private var currentTime: TimeInterval = 0
 
     var body: some View {
         VStack {
-            if let currentSong = audioPlayerManager.currentSong {
-                Text(currentSong.title ?? "Unknown Title")
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
-                    .padding()
-                Text(currentSong.artist ?? "Unknown Artist")
-                    .font(.title)
-                    .foregroundColor(.white)
+            Text(audioPlayerManager.currentSong?.title ?? "No Song Selected")
+                .font(.title)
+                .padding()
+                .background(Color.black.opacity(0.5))
+                .cornerRadius(8)
+                .foregroundColor(.white)
+
+            if let artwork = audioPlayerManager.currentSong?.artwork {
+                Image(uiImage: artwork.image(at: CGSize(width: 300, height: 300))!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 300, height: 300)
+                    .cornerRadius(15)
+                    .shadow(radius: 10)
                     .padding()
             } else {
-                Text("No Song Playing")
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
+                Image(systemName: "music.note")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 300, height: 300)
+                    .cornerRadius(15)
+                    .shadow(radius: 10)
                     .padding()
             }
 
+            // Slider for current time
             Slider(value: Binding(
-                get: { audioPlayerManager.currentPlaybackTime },
-                set: { newTime in audioPlayerManager.seek(to: newTime) }
+                get: { audioPlayerManager.currentTime },
+                set: { newValue in audioPlayerManager.seek(to: newValue) }
             ), in: 0...audioPlayerManager.currentSongDuration)
                 .accentColor(.white)
                 .padding()
-        }
-    }
-}
-
-// MARK: - SettingsView
-
-struct SettingsView: View {
-    @ObservedObject var audioPlayerManager: AudioPlayerManager
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Equalizer Settings")) {
-                    Picker("Equalizer", selection: $audioPlayerManager.currentEqualizerSetting) {
-                        ForEach(AudioPlayerManager.EqualizerSetting.allCases, id: \.self) { setting in
-                            Text(setting.rawValue).tag(setting)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                }
-            }
-            .navigationBarTitle("Settings")
-            .navigationBarItems(trailing: Button("Done") {
-                audioPlayerManager.showSettings = false
-            })
         }
     }
 }
@@ -408,29 +368,34 @@ struct SearchBar: UIViewRepresentable {
             searchBar.resignFirstResponder()
             isSearching = false
         }
+
+        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+            isSearching = false
+            text = ""
+        }
     }
 
     func makeCoordinator() -> Coordinator {
         return Coordinator(text: $text, isSearching: $isSearching)
     }
 
-    func makeUIView(context: Context) -> UISearchBar {
+    func makeUIView(context: UIViewRepresentableContext<SearchBar>) -> UISearchBar {
         let searchBar = UISearchBar(frame: .zero)
         searchBar.delegate = context.coordinator
-        searchBar.autocapitalizationType = .none
-        searchBar.searchBarStyle = .minimal
-        searchBar.placeholder = "Search songs, artists, albums"
+        searchBar.showsCancelButton = true
+        searchBar.placeholder = "Search"
         return searchBar
     }
 
-    func updateUIView(_ uiView: UISearchBar, context: Context) {
+    func updateUIView(_ uiView: UISearchBar, context: UIViewRepresentableContext<SearchBar>) {
         uiView.text = text
     }
 }
 
 // MARK: - Preview
 
-struct CombinedView_Previews: PreviewProvider {
+struct MediaView_Previews: PreviewProvider {
     static var previews: some View {
         MediaView()
     }
