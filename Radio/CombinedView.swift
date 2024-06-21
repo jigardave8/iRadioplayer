@@ -166,6 +166,8 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
 // MARK: - MediaView
 
+import SwiftUI
+
 struct MediaView: View {
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
@@ -176,6 +178,7 @@ struct MediaView: View {
     @State private var currentGradientIndex = 0 // Track the current gradient index
     @State private var useDedicatedGradient = false // Track if the dedicated gradient is used
     @State private var animationPhase = 0.0 // Phase for the animation
+    @State private var isSettingsViewPresented = false // State to control the presentation of SettingsView
 
     // Define different gradients
     private let gradients: [[Color]] = [
@@ -194,7 +197,6 @@ struct MediaView: View {
     // Define dedicated gradients
     private let dedicatedGradient = [Color.black, Color.gray]
     private let lightGradient = [Color.white, Color.gray.opacity(0.5)]
-
 
     var body: some View {
         NavigationView {
@@ -262,7 +264,6 @@ struct MediaView: View {
 
                             // Music Player Controls
                             HStack(spacing: 20) {
-                                
                                 controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
                                 controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
                                 controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 40)
@@ -280,8 +281,6 @@ struct MediaView: View {
                                     useDedicatedGradient.toggle()
                                     currentGradientIndex = 0 // Reset index to use the dedicated gradient
                                 }, color: .purple)
-                                
-
                             }
                             .padding()
                         }
@@ -314,14 +313,25 @@ struct MediaView: View {
                     }
                 }
             }
-            .navigationBarItems(leading: Button(action: {
-                withAnimation {
-                    isSidebarExpanded.toggle()
+            .navigationBarItems(
+                leading: Button(action: {
+                    withAnimation {
+                        isSidebarExpanded.toggle()
+                    }
+                }) {
+                    Image(systemName: "line.horizontal.3")
+                        .imageScale(.large)
+                },
+                trailing: Button(action: {
+                    isSettingsViewPresented.toggle()
+                }) {
+                    Image(systemName: "headphones.circle")
+                        .imageScale(.large)
                 }
-            }) {
-                Image(systemName: "line.horizontal.3")
-                    .imageScale(.large)
-            })
+            )
+            .sheet(isPresented: $isSettingsViewPresented) {
+                SettingsView(audioPlayerManager: audioPlayerManager)
+            }
             .onAppear {
                 libraryViewModel.fetchSongs()
                 audioPlayerManager.setupAudioSession()
@@ -427,6 +437,8 @@ struct NowPlayingView: View {
         return String(format: "%02d:%02d", minutes, seconds)
     }
 }
+
+
 
 // Full screen view to display song details
 struct FullScreenView: View {
