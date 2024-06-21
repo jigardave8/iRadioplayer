@@ -312,20 +312,16 @@ struct NowPlayingView: View {
                 Text(song.artist ?? "Unknown Artist")
                     .font(.title3)
                     .foregroundColor(.gray)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, 8)
                 
-                Text(song.albumTitle ?? "Unknown Album")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.bottom, 4)
 
                 ZStack {
                     if let artwork = song.artwork {
-                        Image(uiImage: artwork.image(at: CGSize(width: 50, height: 50)) ?? UIImage(systemName: "music.note")!)
-                            .fixedSize()
-//                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 250, height: 200)
-                            .padding(.bottom, 10)
+                        Image(uiImage: artwork.image(at: CGSize(width: 250, height: 250)) ?? UIImage(systemName: "music.note")!)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 250, height: 250)
+                            .padding(.bottom, 12)
                             .onTapGesture {
                                 isFullScreen.toggle()
                             }
@@ -334,8 +330,8 @@ struct NowPlayingView: View {
                         Image(systemName: "music.note")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 250, height: 200)
-                            .padding(.bottom, 10)
+                            .frame(width: 250, height: 250)
+                            .padding(.bottom, 12)
                             .cornerRadius(10)
                     }
 
@@ -360,13 +356,13 @@ struct NowPlayingView: View {
                     Text("-\(timeString(time: audioPlayerManager.currentSongDuration - audioPlayerManager.currentPlaybackTime))")
                         .foregroundColor(.white)
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 5)
 
             } else {
                 Text("No song is currently playing.")
                     .font(.title)
                     .foregroundColor(.white)
-                    .padding(.bottom, 2)
+                    .padding(.vertical, 2)
             }
         }
         .sheet(isPresented: $isFullScreen, content: {
@@ -375,7 +371,7 @@ struct NowPlayingView: View {
             }
         })
         .padding(.horizontal, 24)
-        .padding(.top, 2)
+        .padding(.vertical, 2)
     }
 
     // Helper function to format time duration
