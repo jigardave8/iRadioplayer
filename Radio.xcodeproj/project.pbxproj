@@ -15,6 +15,7 @@
 		B70F828A2C2555AA001829BC /* Gradients.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82892C2555A9001829BC /* Gradients.swift */; };
 		B70F828C2C2556A0001829BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F828B2C25569D001829BC /* SearchBar.swift */; };
 		B70F828E2C255E71001829BC /* FullScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F828D2C255E6F001829BC /* FullScreenView.swift */; };
+		B70F82922C257532001829BC /* MediaLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82912C257530001829BC /* MediaLibraryView.swift */; };
 		B73905572C205C48004ECD0B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73905562C205C46004ECD0B /* SettingsView.swift */; };
 		B76320392ACB5AE400A1319E /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76320382ACB5AE400A1319E /* RadioView.swift */; };
 		B7BE7FB42C218DF700ED989F /* RadioStations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BE7FB32C218DF400ED989F /* RadioStations.swift */; };
@@ -33,6 +34,7 @@
 		B70F82892C2555A9001829BC /* Gradients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gradients.swift; sourceTree = "<group>"; };
 		B70F828B2C25569D001829BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		B70F828D2C255E6F001829BC /* FullScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullScreenView.swift; sourceTree = "<group>"; };
+		B70F82912C257530001829BC /* MediaLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaLibraryView.swift; sourceTree = "<group>"; };
 		B73905562C205C46004ECD0B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B76320382ACB5AE400A1319E /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
 		B7BE7FB32C218DF400ED989F /* RadioStations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioStations.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				B70F828B2C25569D001829BC /* SearchBar.swift */,
 				B70F82892C2555A9001829BC /* Gradients.swift */,
 				B70F82832C254BC3001829BC /* MediaView.swift */,
+				B70F82912C257530001829BC /* MediaLibraryView.swift */,
 				B70F82852C254D4D001829BC /* NowPlayingView.swift */,
 				B70F828D2C255E6F001829BC /* FullScreenView.swift */,
 				B70F827D2C254564001829BC /* Particle.sks */,
@@ -187,6 +190,7 @@
 				B70F82862C254D4F001829BC /* NowPlayingView.swift in Sources */,
 				B70F82822C254BAD001829BC /* AudioPlayerManager.swift in Sources */,
 				B7DA1BD62AB83FE300B54B7F /* RadioApp.swift in Sources */,
+				B70F82922C257532001829BC /* MediaLibraryView.swift in Sources */,
 				B7BE7FB42C218DF700ED989F /* RadioStations.swift in Sources */,
 				B70F828C2C2556A0001829BC /* SearchBar.swift in Sources */,
 				B70F82842C254BC5001829BC /* MediaView.swift in Sources */,

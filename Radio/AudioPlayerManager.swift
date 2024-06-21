@@ -43,13 +43,10 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             applyEqualizerSetting()
         }
     }
-    
-    
 
     private var audioEngine: AVAudioEngine?
     private var eqNodes: [AVAudioUnitEQ] = []
 
-    
     func setupAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
@@ -74,7 +71,6 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             print("Failed to play audio:", error.localizedDescription)
         }
     }
-    
 
     func startUpdatingCurrentTime() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in

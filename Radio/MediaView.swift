@@ -13,63 +13,18 @@ struct MediaView: View {
 
     @State private var isSidebarExpanded = false
     @State private var searchText = ""
-    @State private var isSearching = false // Track if the user is actively searching
-    @State private var currentGradientIndex = 0 // Track the current gradient index
-    @State private var useDedicatedGradient = false // Track if the dedicated gradient is used
-    @State private var animationPhase = 0.0 // Phase for the animation
-    @State private var isSettingsViewPresented = false // State to control the presentation of SettingsView
+    @State private var isSearching = false
+    @State private var currentGradientIndex = 0
+    @State private var useDedicatedGradient = false
+    @State private var animationPhase = 0.0
+    @State private var isSettingsViewPresented = false
+    @State private var isMediaLibraryViewPresented = false // State to control the presentation of MediaLibraryView
 
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                ZStack { // Use ZStack to handle taps outside the search bar
+                ZStack {
                     HStack(spacing: 0) {
-                        // Side Panel (Collapsible)
-                        VStack {
-                            Text("Media Library")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .padding(2)
-
-                            // Search Bar
-                            SearchBar(text: $searchText, isSearching: $isSearching)
-                                .padding(.horizontal)
-                                .onTapGesture {
-                                    isSearching = true // Tap on search bar starts searching
-                                }
-
-                            List {
-                                ForEach(libraryViewModel.filteredSongs(searchText: searchText), id: \.persistentID) { song in
-                                    Button(action: {
-                                        libraryViewModel.selectedSong = song
-                                        audioPlayerManager.play(song: song)
-                                    }) {
-                                        HStack {
-                                            Text(song.title ?? "Unknown Title")
-                                                .foregroundColor(song == libraryViewModel.selectedSong ? .blue : .black)
-                                                .padding(8)
-                                                .background(song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying ? Color.yellow : Color.white)
-                                                .cornerRadius(8)
-                                            Spacer()
-                                            if song == libraryViewModel.selectedSong && audioPlayerManager.isPlaying {
-                                                Image(systemName: "speaker.wave.2.fill")
-                                                    .foregroundColor(.green)
-                                                    .padding(8)
-                                                    .background(Color.gray)
-                                                    .cornerRadius(8)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            .onAppear {
-                                libraryViewModel.fetchSongs()
-                            }
-                        }
-                        .frame(width: isSidebarExpanded ? geometry.size.width * 0.6 : 0)
-                        .background(Color.gray.opacity(0.1))
-                        .animation(.linear)
-
                         // Main Content Area
                         VStack {
                             // Now Playing View
@@ -82,18 +37,6 @@ struct MediaView: View {
                                         .shadow(radius: 5)
                                 )
                                 .padding()
-                                .gesture(
-                                    DragGesture()
-                                        .onEnded({ (value) in
-                                            let dragThreshold: CGFloat = 100
-                                            if value.translation.width > dragThreshold {
-                                                audioPlayerManager.playPrevious()
-                                            } else if value.translation.width < -dragThreshold {
-                                                audioPlayerManager.playNext()
-                                            }
-                                        })
-                                )
-                            
                             HStack {
                                 Text(timeString(time: audioPlayerManager.currentPlaybackTime))
                                     .foregroundColor(.white)
@@ -142,6 +85,7 @@ struct MediaView: View {
                                         }
                                 } else {
                                     LinearGradient(gradient: Gradient(colors: gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        .edgesIgnoringSafeArea(.all)
                                 }
                             }
                         )
@@ -153,8 +97,8 @@ struct MediaView: View {
                             .edgesIgnoringSafeArea(.all)
                             .onTapGesture {
                                 isSearching = false
-                                searchText = "" // Clear search text when dismissed
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) // Dismiss keyboard
+                                searchText = ""
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             }
                     }
                 }
@@ -165,24 +109,42 @@ struct MediaView: View {
                         isSidebarExpanded.toggle()
                     }
                 }) {
-                    Image(systemName: "line.horizontal.3")
-                        .imageScale(.large)
+//                    Image(systemName: "line.horizontal.3")
+//                        .imageScale(.large)
                 },
-                trailing: Button(action: {
-                    isSettingsViewPresented.toggle()
-                }) {
-                    Image(systemName: "headphones.circle")
-                        .imageScale(.large)
+                trailing: HStack {
+                    Button(action: {
+                        isMediaLibraryViewPresented.toggle()
+                    }) {
+                        Image(systemName: "music.note.list")
+                            .imageScale(.large)
+                    }
+                    Button(action: {
+                        isSettingsViewPresented.toggle()
+                    }) {
+                        Image(systemName: "headphones.circle")
+                            .imageScale(.large)
+                    }
                 }
             )
             .sheet(isPresented: $isSettingsViewPresented) {
                 SettingsView(audioPlayerManager: audioPlayerManager)
+            }
+            .sheet(isPresented: $isMediaLibraryViewPresented) {
+                MediaLibraryView()
             }
             .onAppear {
                 libraryViewModel.fetchSongs()
                 audioPlayerManager.setupAudioSession()
             }
         }
+    }
+    
+    // Helper function to format time duration
+    public func timeString(time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
     
     // Control Button Helper Subview
@@ -196,12 +158,4 @@ struct MediaView: View {
                 .foregroundColor(color)
         }
     }
-
-    // Helper function to format time duration
-    public func timeString(time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
 }
-
