@@ -295,7 +295,6 @@ struct MediaView: View {
 }
 
 // MARK: - NowPlayingView
-
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
 
@@ -312,14 +311,20 @@ struct NowPlayingView: View {
                     .foregroundColor(.gray)
                     .padding(.bottom, 20)
 
-                // Example album art placeholder
-                Image(systemName: "music.note")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 200, height: 200)
-                    .padding(.bottom, 20)
+                if let artwork = song.artwork {
+                    Image(uiImage: artwork.image(at: CGSize(width: 200, height: 200)) ?? UIImage(systemName: "music.note")!)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 200, height: 200)
+                        .padding(.bottom, 20)
+                } else {
+                    Image(systemName: "music.note")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 200, height: 200)
+                        .padding(.bottom, 20)
+                }
 
-                // Seeker/Slider (Example)
                 Slider(value: Binding(get: {
                     self.audioPlayerManager.currentPlaybackTime
                 }, set: { (newTime) in
