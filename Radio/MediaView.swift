@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct MediaView: View {
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
@@ -19,8 +18,6 @@ struct MediaView: View {
     @State private var useDedicatedGradient = false // Track if the dedicated gradient is used
     @State private var animationPhase = 0.0 // Phase for the animation
     @State private var isSettingsViewPresented = false // State to control the presentation of SettingsView
-
-  
 
     var body: some View {
         NavigationView {
@@ -85,6 +82,18 @@ struct MediaView: View {
                                         .shadow(radius: 5)
                                 )
                                 .padding()
+                                .gesture(
+                                    DragGesture()
+                                        .onEnded({ (value) in
+                                            let dragThreshold: CGFloat = 100
+                                            if value.translation.width > dragThreshold {
+                                                audioPlayerManager.playPrevious()
+                                            } else if value.translation.width < -dragThreshold {
+                                                audioPlayerManager.playNext()
+                                            }
+                                        })
+                                )
+                            
                             HStack {
                                 Text(timeString(time: audioPlayerManager.currentPlaybackTime))
                                     .foregroundColor(.white)
@@ -98,7 +107,7 @@ struct MediaView: View {
                                     .foregroundColor(.white)
                             }
                             .padding(.vertical, 5)
-                            .padding(.bottom,1)
+                            .padding(.bottom, 1)
 
                             // Music Player Controls
                             HStack(spacing: 20) {
@@ -133,7 +142,6 @@ struct MediaView: View {
                                         }
                                 } else {
                                     LinearGradient(gradient: Gradient(colors: gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                        .edgesIgnoringSafeArea(.all)
                                 }
                             }
                         )
@@ -177,16 +185,6 @@ struct MediaView: View {
         }
     }
     
-    // Helper function to format time duration
-    public func timeString(time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-}
-
-
-    
     // Control Button Helper Subview
     @ViewBuilder
     func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 30) -> some View {
@@ -198,4 +196,12 @@ struct MediaView: View {
                 .foregroundColor(color)
         }
     }
+
+    // Helper function to format time duration
+    public func timeString(time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+}
 

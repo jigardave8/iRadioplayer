@@ -8,10 +8,12 @@
 import SwiftUI
 import MediaPlayer
 
-
 struct NowPlayingView: View {
     @ObservedObject var audioPlayerManager: AudioPlayerManager
     @State private var isFullScreen = false // State to manage full-screen mode
+    
+    @GestureState private var dragState = DragState.inactive // Gesture state for tracking drag gestures
+    @State private var offset: CGFloat = 0 // Offset to animate album art
     
     var body: some View {
         VStack {
@@ -29,17 +31,32 @@ struct NowPlayingView: View {
                 
                 ZStack {
                     if let artwork = song.artwork {
-                        GeometryReader { geometry in
-                            Image(uiImage: artwork.image(at: CGSize(width: 250, height: 250)) ?? UIImage(systemName: "music.note")!)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .padding(.bottom, 5)
-                                .cornerRadius(10)
-                                .onTapGesture {
-                                    isFullScreen.toggle()
+                        Image(uiImage: artwork.image(at: CGSize(width: 250, height: 250)) ?? UIImage(systemName: "music.note")!)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 250, height: 250)
+                            .offset(x: offset) // Apply offset for animation
+                            .cornerRadius(10)
+                            .gesture(
+                                DragGesture()
+                                    .updating($dragState, body: { (value, state, _) in
+                                        state = .dragging(translation: value.translation.width)
+                                    })
+                                    .onEnded({ (value) in
+                                        let dragThreshold: CGFloat = 100
+                                        if value.translation.width > dragThreshold {
+                                            audioPlayerManager.playPrevious()
+                                        } else if value.translation.width < -dragThreshold {
+                                            audioPlayerManager.playNext()
+                                        }
+                                    })
+                            )
+                            .animation(.interpolatingSpring)
+                            .onChange(of: audioPlayerManager.currentSong) { _ in
+                                withAnimation {
+                                    offset = 0.1 // Reset offset when song changes
                                 }
-                        }
+                            }
                     } else {
                         Image(systemName: "music.note")
                             .resizable()
@@ -47,9 +64,6 @@ struct NowPlayingView: View {
                             .frame(width: 250, height: 250)
                             .padding(.top, 5)
                             .cornerRadius(10)
-                            .onTapGesture {
-                                isFullScreen.toggle()
-                            }
                     }
                 }
                 .frame(width: 250, height: 250)
@@ -74,4 +88,10 @@ struct NowPlayingView: View {
             }
         }
     }
+}
+
+// Gesture state for tracking drag gestures
+private enum DragState {
+    case inactive
+    case dragging(translation: CGFloat)
 }
