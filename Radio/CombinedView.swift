@@ -25,8 +25,8 @@ class LibraryViewModel: ObservableObject {
             return songs.filter { song in
                 let searchLowercased = searchText.lowercased()
                 return song.title?.lowercased().contains(searchLowercased) == true ||
-                song.artist?.lowercased().contains(searchLowercased) == true ||
-                song.albumTitle?.lowercased().contains(searchLowercased) == true
+                    song.artist?.lowercased().contains(searchLowercased) == true ||
+                    song.albumTitle?.lowercased().contains(searchLowercased) == true
             }
         }
     }
@@ -301,102 +301,87 @@ struct NowPlayingView: View {
 
     var body: some View {
         VStack {
-            Text(audioPlayerManager.currentSong?.title ?? "No Song Selected")
-                .font(.title)
-                .padding()
-                .background(Color.black.opacity(0.5))
-                .cornerRadius(8)
-                .foregroundColor(.white)
+            if let song = audioPlayerManager.currentSong {
+                Text(song.title ?? "Unknown Title")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding(.bottom, 5)
 
-            if let artwork = audioPlayerManager.currentSong?.artwork {
-                Image(uiImage: artwork.image(at: CGSize(width: 300, height: 300))!)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 300, height: 300)
-                    .cornerRadius(15)
-                    .shadow(radius: 10)
-                    .padding()
-            } else {
+                Text(song.artist ?? "Unknown Artist")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 20)
+
+                // Example album art placeholder
                 Image(systemName: "music.note")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 300, height: 300)
-                    .cornerRadius(15)
-                    .shadow(radius: 10)
-                    .padding()
-            }
+                    .frame(width: 200, height: 200)
+                    .padding(.bottom, 20)
 
-            // Slider for current time
-            Slider(value: Binding(
-                get: { audioPlayerManager.currentTime },
-                set: { newValue in audioPlayerManager.seek(to: newValue) }
-            ), in: 0...audioPlayerManager.currentSongDuration)
-                .accentColor(.white)
-                .padding()
+                // Seeker/Slider (Example)
+                Slider(value: Binding(get: {
+                    self.audioPlayerManager.currentPlaybackTime
+                }, set: { (newTime) in
+                    self.audioPlayerManager.seek(to: newTime)
+                }), in: 0...self.audioPlayerManager.currentSongDuration)
+                .accentColor(.green)
+
+            } else {
+                Text("No song is currently playing.")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .padding(.bottom, 5)
+            }
         }
     }
 }
 
 // MARK: - SearchBar
 
-struct SearchBar: UIViewRepresentable {
+struct SearchBar: View {
     @Binding var text: String
     @Binding var isSearching: Bool
 
-    class Coordinator: NSObject, UISearchBarDelegate {
-        @Binding var text: String
-        @Binding var isSearching: Bool
+    var body: some View {
+        HStack {
+            TextField("Search", text: $text)
+                .padding(.leading, 30)
+                .padding(.vertical, 10)
+                .background(Color.gray.opacity(0.3))
+                .cornerRadius(8)
+                .overlay(
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                            .padding(.leading, 10)
+                        Spacer()
+                        if !text.isEmpty {
+                            Button(action: {
+                                self.text = ""
+                            }) {
+                                Image(systemName: "multiply.circle.fill")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 10)
+                            }
+                        }
+                    }
+                )
+                .onTapGesture {
+                    self.isSearching = true
+                }
 
-        init(text: Binding<String>, isSearching: Binding<Bool>) {
-            _text = text
-            _isSearching = isSearching
+            if isSearching {
+                Button(action: {
+                    self.text = ""
+                    self.isSearching = false
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) // Dismiss keyboard
+                }) {
+                    Text("Cancel")
+                        .foregroundColor(.blue)
+                }
+                .padding(.trailing, 10)
+            }
         }
-
-        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            text = searchText
-        }
-
-        func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-            isSearching = true
-        }
-
-        func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-            isSearching = false
-        }
-
-        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.resignFirstResponder()
-            isSearching = false
-        }
-
-        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-            searchBar.resignFirstResponder()
-            isSearching = false
-            text = ""
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(text: $text, isSearching: $isSearching)
-    }
-
-    func makeUIView(context: UIViewRepresentableContext<SearchBar>) -> UISearchBar {
-        let searchBar = UISearchBar(frame: .zero)
-        searchBar.delegate = context.coordinator
-        searchBar.showsCancelButton = true
-        searchBar.placeholder = "Search"
-        return searchBar
-    }
-
-    func updateUIView(_ uiView: UISearchBar, context: UIViewRepresentableContext<SearchBar>) {
-        uiView.text = text
-    }
-}
-
-// MARK: - Preview
-
-struct MediaView_Previews: PreviewProvider {
-    static var previews: some View {
-        MediaView()
     }
 }
