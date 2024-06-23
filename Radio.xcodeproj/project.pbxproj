@@ -65,6 +65,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B777EA1C2C27C66800F5929B /* Visualizer */ = {
+			isa = PBXGroup;
+			children = (
+				B70F82932C258062001829BC /* VisualizerScene.swift */,
+				B70F82952C2580CC001829BC /* VisualizerView.swift */,
+			);
+			path = Visualizer;
+			sourceTree = "<group>";
+		};
 		B7DA1BC92AB83FE200B54B7F = {
 			isa = PBXGroup;
 			children = (
@@ -93,8 +102,7 @@
 				B70F828B2C25569D001829BC /* SearchBar.swift */,
 				B70F82892C2555A9001829BC /* Gradients.swift */,
 				B70F82832C254BC3001829BC /* MediaView.swift */,
-				B70F82932C258062001829BC /* VisualizerScene.swift */,
-				B70F82952C2580CC001829BC /* VisualizerView.swift */,
+				B777EA1C2C27C66800F5929B /* Visualizer */,
 				B70F82912C257530001829BC /* MediaLibraryView.swift */,
 				B70F82852C254D4D001829BC /* NowPlayingView.swift */,
 				B70F828D2C255E6F001829BC /* FullScreenView.swift */,

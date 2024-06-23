@@ -18,11 +18,18 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var showSettings: Bool = false
     @Published var currentTime: TimeInterval = 0
     @Published var currentSong: MPMediaItem?
+    @Published var currentEqualizerSetting: EqualizerSetting = .normal {
+        didSet {
+            applyEqualizerSetting()
+        }
+    }
 
-    var audioPlayer: AVAudioPlayer?
-    var currentIndex: Int = 0
-
+    private var audioPlayer: AVAudioPlayer?
+    private var currentIndex: Int = 0
     private var timer: Timer?
+    private var audioEngine: AVAudioEngine?
+    private var eqNodes: [AVAudioUnitEQ] = []
+
     let currentTimePublisher = PassthroughSubject<TimeInterval, Never>()
 
     enum EqualizerSetting: String, CaseIterable {
@@ -38,22 +45,36 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         case reset = "Reset"
     }
 
-    @Published var currentEqualizerSetting: EqualizerSetting = .normal {
-        didSet {
-            applyEqualizerSetting()
-        }
+    override init() {
+        super.init()
+        setupAudioSession()
+        setupAudioEngine()
     }
 
-    private var audioEngine: AVAudioEngine?
-    private var eqNodes: [AVAudioUnitEQ] = []
-
-    func setupAudioSession() {
+    public func setupAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to configure audio session:", error.localizedDescription)
         }
+    }
+
+    private func setupAudioEngine() {
+        audioEngine = AVAudioEngine()
+        eqNodes = EqualizerSetting.allCases.map { _ in
+            let eq = AVAudioUnitEQ(numberOfBands: 10)
+            audioEngine?.attach(eq)
+            return eq
+        }
+
+        if let audioEngine = audioEngine {
+            for i in 0..<eqNodes.count {
+                audioEngine.connect(eqNodes[i], to: i == eqNodes.count - 1 ? audioEngine.mainMixerNode : eqNodes[i + 1], format: nil)
+            }
+        }
+
+        applyEqualizerSetting()
     }
 
     func play(song: MPMediaItem) {
@@ -72,15 +93,15 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
 
-    func startUpdatingCurrentTime() {
+    private func startUpdatingCurrentTime() {
+        timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            self.updateCurrentTime()
+            self?.updateCurrentTime()
         }
         timer?.fire()
     }
 
-    func updateCurrentTime() {
+    private func updateCurrentTime() {
         guard let player = audioPlayer else { return }
         currentTime = player.currentTime
         currentTimePublisher.send(currentTime)
@@ -102,8 +123,8 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     func togglePlayPause() {
-        if audioPlayer?.isPlaying == true {
-            audioPlayer?.pause()
+        if let player = audioPlayer, player.isPlaying {
+            player.pause()
             isPlaying = false
         } else {
             audioPlayer?.play()
@@ -126,7 +147,56 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     private func applyEqualizerSetting() {
-        // Placeholder for actual equalizer settings implementation
+        guard let audioEngine = audioEngine else { return }
+
+        for eq in eqNodes {
+            for band in eq.bands {
+                band.filterType = .parametric
+                band.bypass = true
+            }
+        }
+
+        switch currentEqualizerSetting {
+        case .normal:
+            break
+        case .rock:
+            applyBandsSettings([3.0, 2.5, 2.0, 1.5, 1.0])
+        case .pop:
+            applyBandsSettings([2.0, 2.0, 2.0, 1.0, 1.0])
+        case .jazz:
+            applyBandsSettings([2.5, 2.0, 1.5, 1.0, 1.0])
+        case .bass:
+            applyBandsSettings([4.0, 3.5, 3.0, 2.5, 2.0])
+        case .treble:
+            applyBandsSettings([1.5, 1.0, 0.5, 0.0, 0.0])
+        case .bassAndTreble:
+            applyBandsSettings([3.5, 3.0, 2.5, 2.0, 1.5])
+        case .classical:
+            applyBandsSettings([2.0, 1.5, 1.0, 0.5, 0.5])
+        case .hipHop:
+            applyBandsSettings([3.0, 2.5, 2.0, 1.5, 1.5])
+        case .reset:
+            applyBandsSettings([0.0, 0.0, 0.0, 0.0, 0.0])
+        }
+
+        audioEngine.mainMixerNode.outputVolume = audioLevels
+        do {
+            try audioEngine.start()
+        } catch {
+            print("Failed to start audio engine:", error.localizedDescription)
+        }
+    }
+
+    private func applyBandsSettings(_ values: [Float]) {
+        for (index, value) in values.enumerated() {
+            if index < eqNodes.count {
+                let eq = eqNodes[index]
+                for band in eq.bands {
+                    band.gain = value
+                    band.bypass = false
+                }
+            }
+        }
     }
 
     var currentPlaybackTime: Double {
@@ -135,5 +205,10 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     var currentSongDuration: Double {
         return audioPlayer?.duration ?? 0
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        isPlaying = false
+        playNext()
     }
 }
