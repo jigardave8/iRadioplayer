@@ -5,14 +5,6 @@
 //  Created by Jigar on 21/06/24.
 //
 
-
-//
-//  MediaView.swift
-//  Radio
-//
-//  Created by Jigar on 21/06/24.
-//
-
 import SwiftUI
 
 struct MediaView: View {
@@ -26,17 +18,15 @@ struct MediaView: View {
     @State private var useDedicatedGradient = false
     @State private var animationPhase = 0.0
     @State private var isSettingsViewPresented = false
-    @State private var isMediaLibraryViewPresented = false // State to control the presentation of MediaLibraryView
-    @State private var isVisualizerViewPresented = false // State to control the presentation of VisualizerView
+    @State private var isMediaLibraryViewPresented = false
+    @State private var isVisualizerViewPresented = false
 
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
                 ZStack {
                     HStack(spacing: 0) {
-                        // Main Content Area
                         VStack {
-                            // Now Playing View
                             NowPlayingView(audioPlayerManager: audioPlayerManager)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding()
@@ -46,12 +36,13 @@ struct MediaView: View {
                                         .shadow(radius: 5)
                                 )
                                 .padding()
+                            
                             HStack {
                                 Text(timeString(time: audioPlayerManager.currentPlaybackTime))
                                     .foregroundColor(.white)
                                 Slider(value: Binding(get: {
                                     self.audioPlayerManager.currentPlaybackTime
-                                }, set: { (newTime) in
+                                }, set: { newTime in
                                     self.audioPlayerManager.seek(to: newTime)
                                 }), in: 0...self.audioPlayerManager.currentSongDuration)
                                 .accentColor(.green)
@@ -61,24 +52,19 @@ struct MediaView: View {
                             .padding(.vertical, 5)
                             .padding(.bottom, 1)
 
-                            // Music Player Controls
                             HStack(spacing: 20) {
                                 controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
                                 controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
                                 controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 40)
                                 controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
                                 controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
-
-                                // Button to change gradient
                                 controlButton(iconName: "paintbrush.fill", action: {
                                     useDedicatedGradient = false
                                     currentGradientIndex = (currentGradientIndex + 1) % gradients.count
                                 }, color: .blue)
-
-                                // Button to toggle dedicated gradient
                                 controlButton(iconName: "circle.lefthalf.fill", action: {
                                     useDedicatedGradient.toggle()
-                                    currentGradientIndex = 0 // Reset index to use the dedicated gradient
+                                    currentGradientIndex = 0
                                 }, color: .purple)
                             }
                             .padding()
@@ -100,7 +86,6 @@ struct MediaView: View {
                         )
                     }
 
-                    // Dismiss the search view by tapping outside the search bar
                     if isSearching {
                         Color.black.opacity(0.4)
                             .edgesIgnoringSafeArea(.all)
@@ -112,14 +97,14 @@ struct MediaView: View {
                     }
                 }
                 .navigationBarItems(
-                    leading: Button(action: {
-                        withAnimation {
-                            isSidebarExpanded.toggle()
-                        }
-                    }) {
-                        // Image(systemName: "line.horizontal.3")
-                        //     .imageScale(.large)
-                    },
+//                    leading: Button(action: {
+//                        withAnimation {
+//                            isSidebarExpanded.toggle()
+//                        }
+//                    }) {
+//                        Image(systemName: "line.horizontal.3")
+//                            .imageScale(.large)
+//                    },
                     trailing: HStack {
                         Button(action: {
                             isMediaLibraryViewPresented.toggle()
@@ -158,16 +143,14 @@ struct MediaView: View {
         }
     }
     
-    // Helper function to format time duration
-    public func timeString(time: TimeInterval) -> String {
+    private func timeString(time: TimeInterval) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
     
-    // Control Button Helper Subview
     @ViewBuilder
-    func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 30) -> some View {
+    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 30) -> some View {
         Button(action: action) {
             Image(systemName: iconName)
                 .resizable()
