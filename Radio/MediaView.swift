@@ -5,6 +5,14 @@
 //  Created by Jigar on 21/06/24.
 //
 
+
+//
+//  MediaView.swift
+//  Radio
+//
+//  Created by Jigar on 21/06/24.
+//
+
 import SwiftUI
 
 struct MediaView: View {
@@ -19,6 +27,7 @@ struct MediaView: View {
     @State private var animationPhase = 0.0
     @State private var isSettingsViewPresented = false
     @State private var isMediaLibraryViewPresented = false // State to control the presentation of MediaLibraryView
+    @State private var isVisualizerViewPresented = false // State to control the presentation of VisualizerView
 
     var body: some View {
         NavigationView {
@@ -102,40 +111,49 @@ struct MediaView: View {
                             }
                     }
                 }
-            }
-            .navigationBarItems(
-                leading: Button(action: {
-                    withAnimation {
-                        isSidebarExpanded.toggle()
-                    }
-                }) {
-//                    Image(systemName: "line.horizontal.3")
-//                        .imageScale(.large)
-                },
-                trailing: HStack {
-                    Button(action: {
-                        isMediaLibraryViewPresented.toggle()
+                .navigationBarItems(
+                    leading: Button(action: {
+                        withAnimation {
+                            isSidebarExpanded.toggle()
+                        }
                     }) {
-                        Image(systemName: "music.note.list")
-                            .imageScale(.large)
+                        // Image(systemName: "line.horizontal.3")
+                        //     .imageScale(.large)
+                    },
+                    trailing: HStack {
+                        Button(action: {
+                            isMediaLibraryViewPresented.toggle()
+                        }) {
+                            Image(systemName: "music.note.list")
+                                .imageScale(.large)
+                        }
+                        Button(action: {
+                            isVisualizerViewPresented.toggle()
+                        }) {
+                            Image(systemName: "waveform.path.ecg")
+                                .imageScale(.large)
+                        }
+                        Button(action: {
+                            isSettingsViewPresented.toggle()
+                        }) {
+                            Image(systemName: "headphones.circle")
+                                .imageScale(.large)
+                        }
                     }
-                    Button(action: {
-                        isSettingsViewPresented.toggle()
-                    }) {
-                        Image(systemName: "headphones.circle")
-                            .imageScale(.large)
-                    }
+                )
+                .sheet(isPresented: $isSettingsViewPresented) {
+                    SettingsView(audioPlayerManager: audioPlayerManager)
                 }
-            )
-            .sheet(isPresented: $isSettingsViewPresented) {
-                SettingsView(audioPlayerManager: audioPlayerManager)
-            }
-            .sheet(isPresented: $isMediaLibraryViewPresented) {
-                MediaLibraryView()
-            }
-            .onAppear {
-                libraryViewModel.fetchSongs()
-                audioPlayerManager.setupAudioSession()
+                .sheet(isPresented: $isMediaLibraryViewPresented) {
+                    MediaLibraryView()
+                }
+                .sheet(isPresented: $isVisualizerViewPresented) {
+                    VisualizerView(scene: VisualizerScene(size: geometry.size))
+                }
+                .onAppear {
+                    libraryViewModel.fetchSongs()
+                    audioPlayerManager.setupAudioSession()
+                }
             }
         }
     }
