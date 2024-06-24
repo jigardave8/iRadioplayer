@@ -12,14 +12,27 @@
 		B70F82822C254BAD001829BC /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82812C254BAA001829BC /* AudioPlayerManager.swift */; };
 		B70F82842C254BC5001829BC /* MediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82832C254BC3001829BC /* MediaView.swift */; };
 		B70F82862C254D4F001829BC /* NowPlayingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82852C254D4D001829BC /* NowPlayingView.swift */; };
-		B70F828A2C2555AA001829BC /* Gradients.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82892C2555A9001829BC /* Gradients.swift */; };
-		B70F828C2C2556A0001829BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F828B2C25569D001829BC /* SearchBar.swift */; };
 		B70F828E2C255E71001829BC /* FullScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F828D2C255E6F001829BC /* FullScreenView.swift */; };
 		B70F82922C257532001829BC /* MediaLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82912C257530001829BC /* MediaLibraryView.swift */; };
 		B70F82942C258065001829BC /* VisualizerScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82932C258062001829BC /* VisualizerScene.swift */; };
 		B70F82962C2580CE001829BC /* VisualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70F82952C2580CC001829BC /* VisualizerView.swift */; };
 		B73905572C205C48004ECD0B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73905562C205C46004ECD0B /* SettingsView.swift */; };
 		B76320392ACB5AE400A1319E /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76320382ACB5AE400A1319E /* RadioView.swift */; };
+		B777EA1F2C27EE2B00F5929B /* SparkScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA1E2C27EE2B00F5929B /* SparkScene.sks */; };
+		B777EA202C27EE2B00F5929B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B777EA1D2C27EE2B00F5929B /* Assets.xcassets */; };
+		B777EA262C27F4BB00F5929B /* SnowScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA252C27F4BB00F5929B /* SnowScene.sks */; };
+		B777EA282C27F4CF00F5929B /* SmokeScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA272C27F4CF00F5929B /* SmokeScene.sks */; };
+		B777EA2A2C27F4E800F5929B /* RainScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA292C27F4E800F5929B /* RainScene.sks */; };
+		B777EA2C2C27F50100F5929B /* MagicScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA2B2C27F50100F5929B /* MagicScene.sks */; };
+		B777EA2E2C27F51900F5929B /* FirefliesScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA2D2C27F51900F5929B /* FirefliesScene.sks */; };
+		B777EA302C27F53300F5929B /* FireScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = B777EA2F2C27F53200F5929B /* FireScene.sks */; };
+		B777EA322C27F66F00F5929B /* SnowScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA312C27F66D00F5929B /* SnowScene.swift */; };
+		B777EA342C27F67A00F5929B /* SmokeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA332C27F67700F5929B /* SmokeScene.swift */; };
+		B777EA362C27F68200F5929B /* RainScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA352C27F68100F5929B /* RainScene.swift */; };
+		B777EA382C27F68D00F5929B /* MagicScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA372C27F68A00F5929B /* MagicScene.swift */; };
+		B777EA3A2C27F69700F5929B /* FirefliesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA392C27F69500F5929B /* FirefliesScene.swift */; };
+		B777EA3C2C27F6A500F5929B /* FireScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA3B2C27F6A300F5929B /* FireScene.swift */; };
+		B777EA3E2C27F71E00F5929B /* SparkScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B777EA3D2C27F71900F5929B /* SparkScene.swift */; };
 		B7BE7FB42C218DF700ED989F /* RadioStations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BE7FB32C218DF400ED989F /* RadioStations.swift */; };
 		B7DA1BD62AB83FE300B54B7F /* RadioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DA1BD52AB83FE200B54B7F /* RadioApp.swift */; };
 		B7DA1BD82AB83FE300B54B7F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DA1BD72AB83FE300B54B7F /* ContentView.swift */; };
@@ -33,14 +46,27 @@
 		B70F82812C254BAA001829BC /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
 		B70F82832C254BC3001829BC /* MediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaView.swift; sourceTree = "<group>"; };
 		B70F82852C254D4D001829BC /* NowPlayingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingView.swift; sourceTree = "<group>"; };
-		B70F82892C2555A9001829BC /* Gradients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gradients.swift; sourceTree = "<group>"; };
-		B70F828B2C25569D001829BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		B70F828D2C255E6F001829BC /* FullScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullScreenView.swift; sourceTree = "<group>"; };
 		B70F82912C257530001829BC /* MediaLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaLibraryView.swift; sourceTree = "<group>"; };
 		B70F82932C258062001829BC /* VisualizerScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerScene.swift; sourceTree = "<group>"; };
 		B70F82952C2580CC001829BC /* VisualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerView.swift; sourceTree = "<group>"; };
 		B73905562C205C46004ECD0B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B76320382ACB5AE400A1319E /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
+		B777EA1D2C27EE2B00F5929B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Visualizer/Assets.xcassets; sourceTree = "<group>"; };
+		B777EA1E2C27EE2B00F5929B /* SparkScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = SparkScene.sks; sourceTree = "<group>"; };
+		B777EA252C27F4BB00F5929B /* SnowScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = SnowScene.sks; sourceTree = "<group>"; };
+		B777EA272C27F4CF00F5929B /* SmokeScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = SmokeScene.sks; sourceTree = "<group>"; };
+		B777EA292C27F4E800F5929B /* RainScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = RainScene.sks; sourceTree = "<group>"; };
+		B777EA2B2C27F50100F5929B /* MagicScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MagicScene.sks; sourceTree = "<group>"; };
+		B777EA2D2C27F51900F5929B /* FirefliesScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = FirefliesScene.sks; sourceTree = "<group>"; };
+		B777EA2F2C27F53200F5929B /* FireScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = FireScene.sks; sourceTree = "<group>"; };
+		B777EA312C27F66D00F5929B /* SnowScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnowScene.swift; sourceTree = "<group>"; };
+		B777EA332C27F67700F5929B /* SmokeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeScene.swift; sourceTree = "<group>"; };
+		B777EA352C27F68100F5929B /* RainScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainScene.swift; sourceTree = "<group>"; };
+		B777EA372C27F68A00F5929B /* MagicScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagicScene.swift; sourceTree = "<group>"; };
+		B777EA392C27F69500F5929B /* FirefliesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirefliesScene.swift; sourceTree = "<group>"; };
+		B777EA3B2C27F6A300F5929B /* FireScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireScene.swift; sourceTree = "<group>"; };
+		B777EA3D2C27F71900F5929B /* SparkScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkScene.swift; sourceTree = "<group>"; };
 		B7BE7FB32C218DF400ED989F /* RadioStations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioStations.swift; sourceTree = "<group>"; };
 		B7DA1BD22AB83FE200B54B7F /* Radio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Radio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7DA1BD52AB83FE200B54B7F /* RadioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioApp.swift; sourceTree = "<group>"; };
@@ -50,8 +76,19 @@
 		B7DA1BE32AB840B900B54B7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B777EA3F2C27FC8000F5929B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Gradients.swift,
+				SearchBar.swift,
+			);
+			target = B7DA1BD12AB83FE200B54B7F /* Radio */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		B7BE7FBB2C22CB1E00ED989F /* other */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = other; sourceTree = "<group>"; };
+		B7BE7FBB2C22CB1E00ED989F /* other */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (B777EA3F2C27FC8000F5929B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = other; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +105,23 @@
 		B777EA1C2C27C66800F5929B /* Visualizer */ = {
 			isa = PBXGroup;
 			children = (
-				B70F82932C258062001829BC /* VisualizerScene.swift */,
+				B70F827D2C254564001829BC /* VisualizerScene.sks */,
+				B777EA1E2C27EE2B00F5929B /* SparkScene.sks */,
+				B777EA252C27F4BB00F5929B /* SnowScene.sks */,
+				B777EA272C27F4CF00F5929B /* SmokeScene.sks */,
+				B777EA292C27F4E800F5929B /* RainScene.sks */,
+				B777EA2B2C27F50100F5929B /* MagicScene.sks */,
+				B777EA2D2C27F51900F5929B /* FirefliesScene.sks */,
+				B777EA2F2C27F53200F5929B /* FireScene.sks */,
 				B70F82952C2580CC001829BC /* VisualizerView.swift */,
+				B70F82932C258062001829BC /* VisualizerScene.swift */,
+				B777EA3D2C27F71900F5929B /* SparkScene.swift */,
+				B777EA312C27F66D00F5929B /* SnowScene.swift */,
+				B777EA332C27F67700F5929B /* SmokeScene.swift */,
+				B777EA352C27F68100F5929B /* RainScene.swift */,
+				B777EA372C27F68A00F5929B /* MagicScene.swift */,
+				B777EA392C27F69500F5929B /* FirefliesScene.swift */,
+				B777EA3B2C27F6A300F5929B /* FireScene.swift */,
 			);
 			path = Visualizer;
 			sourceTree = "<group>";
@@ -99,14 +151,12 @@
 				B73905562C205C46004ECD0B /* SettingsView.swift */,
 				B70F827F2C254B8A001829BC /* LibraryViewModel.swift */,
 				B70F82812C254BAA001829BC /* AudioPlayerManager.swift */,
-				B70F828B2C25569D001829BC /* SearchBar.swift */,
-				B70F82892C2555A9001829BC /* Gradients.swift */,
 				B70F82832C254BC3001829BC /* MediaView.swift */,
-				B777EA1C2C27C66800F5929B /* Visualizer */,
 				B70F82912C257530001829BC /* MediaLibraryView.swift */,
 				B70F82852C254D4D001829BC /* NowPlayingView.swift */,
 				B70F828D2C255E6F001829BC /* FullScreenView.swift */,
-				B70F827D2C254564001829BC /* VisualizerScene.sks */,
+				B777EA1C2C27C66800F5929B /* Visualizer */,
+				B777EA1D2C27EE2B00F5929B /* Assets.xcassets */,
 				B7BE7FBB2C22CB1E00ED989F /* other */,
 				B76320382ACB5AE400A1319E /* RadioView.swift */,
 				B7BE7FB32C218DF400ED989F /* RadioStations.swift */,
@@ -182,9 +232,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B777EA302C27F53300F5929B /* FireScene.sks in Resources */,
+				B777EA262C27F4BB00F5929B /* SnowScene.sks in Resources */,
+				B777EA2A2C27F4E800F5929B /* RainScene.sks in Resources */,
 				B7DA1BDD2AB83FF400B54B7F /* Preview Assets.xcassets in Resources */,
+				B777EA282C27F4CF00F5929B /* SmokeScene.sks in Resources */,
 				B70F827E2C254564001829BC /* VisualizerScene.sks in Resources */,
 				B7DA1BDA2AB83FF400B54B7F /* Assets.xcassets in Resources */,
+				B777EA1F2C27EE2B00F5929B /* SparkScene.sks in Resources */,
+				B777EA2C2C27F50100F5929B /* MagicScene.sks in Resources */,
+				B777EA202C27EE2B00F5929B /* Assets.xcassets in Resources */,
+				B777EA2E2C27F51900F5929B /* FirefliesScene.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,10 +253,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B777EA3E2C27F71E00F5929B /* SparkScene.swift in Sources */,
 				B70F82942C258065001829BC /* VisualizerScene.swift in Sources */,
+				B777EA3C2C27F6A500F5929B /* FireScene.swift in Sources */,
 				B70F82802C254B8C001829BC /* LibraryViewModel.swift in Sources */,
-				B70F828A2C2555AA001829BC /* Gradients.swift in Sources */,
 				B73905572C205C48004ECD0B /* SettingsView.swift in Sources */,
+				B777EA362C27F68200F5929B /* RainScene.swift in Sources */,
+				B777EA342C27F67A00F5929B /* SmokeScene.swift in Sources */,
 				B76320392ACB5AE400A1319E /* RadioView.swift in Sources */,
 				B7DA1BD82AB83FE300B54B7F /* ContentView.swift in Sources */,
 				B70F828E2C255E71001829BC /* FullScreenView.swift in Sources */,
@@ -208,8 +269,10 @@
 				B70F82962C2580CE001829BC /* VisualizerView.swift in Sources */,
 				B70F82922C257532001829BC /* MediaLibraryView.swift in Sources */,
 				B7BE7FB42C218DF700ED989F /* RadioStations.swift in Sources */,
-				B70F828C2C2556A0001829BC /* SearchBar.swift in Sources */,
 				B70F82842C254BC5001829BC /* MediaView.swift in Sources */,
+				B777EA382C27F68D00F5929B /* MagicScene.swift in Sources */,
+				B777EA3A2C27F69700F5929B /* FirefliesScene.swift in Sources */,
+				B777EA322C27F66F00F5929B /* SnowScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

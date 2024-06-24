@@ -20,6 +20,7 @@ struct MediaView: View {
     @State private var isSettingsViewPresented = false
     @State private var isMediaLibraryViewPresented = false
     @State private var isVisualizerViewPresented = false
+    
 
     var body: some View {
         NavigationView {
@@ -133,7 +134,7 @@ struct MediaView: View {
                     MediaLibraryView()
                 }
                 .sheet(isPresented: $isVisualizerViewPresented) {
-                    VisualizerView(scene: VisualizerScene(size: geometry.size))
+                    VisualizerView()
                 }
                 .onAppear {
                     libraryViewModel.fetchSongs()

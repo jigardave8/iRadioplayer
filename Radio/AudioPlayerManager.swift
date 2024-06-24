@@ -140,6 +140,9 @@ class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         timer = nil
     }
 
+    
+    
+    
     func shuffle() {
         LibraryViewModel.shared.songs.shuffle()
         currentIndex = 0
