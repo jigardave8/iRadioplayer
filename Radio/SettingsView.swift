@@ -19,6 +19,8 @@ struct SettingsView: View {
                 .foregroundColor(.white)
                 .padding(.top, 40)
                 .padding(.bottom, 20)
+            
+            
 
             Picker("Equalizer", selection: $audioPlayerManager.currentEqualizerSetting) {
                 ForEach(AudioPlayerManager.EqualizerSetting.allCases, id: \.self) { setting in
