@@ -1,7 +1,13 @@
 
 # RadioStream-Online
 
-![Online Radio App Screenshot](screenshot.png) 
+<img src="https://github.com/user-attachments/assets/d60d1d8b-1b2b-45bf-a54a-008bb1efbd23" width="250" />
+<img src="https://github.com/user-attachments/assets/ad8b1fff-1e6b-4dbd-a4ee-4cb197c5589b" width="250" />
+<img src="https://github.com/user-attachments/assets/91b478a9-b317-4740-ab6d-c05b7f90a8c5" width="250" />
+<img src="https://github.com/user-attachments/assets/a7f1f78a-3085-4b4f-bab5-a2564b293978" width="250" />
+<img src="https://github.com/user-attachments/assets/9e8d4084-a313-4443-8265-1b5547e143a5" width="250" />
+
+
 
 ## Overview
 
@@ -67,7 +73,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-For any inquiries or feedback, please reach out to [your-email@example.com](mailto:your-email@example.com).
+For any inquiries or feedback, please reach out to jdavenz8@gmail.com
 ```
 
-Feel free to adjust the content and sections to better match your app’s functionality and your personal style!
