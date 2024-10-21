@@ -31,7 +31,7 @@ This project is an Online Radio App that allows users to stream live radio stati
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/online-radio-app.git
+   git clone https://github.com/jigardave8/RadioStream-Online.git
    ```
 2. Open the project in Xcode:
    ```bash
