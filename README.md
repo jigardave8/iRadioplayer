@@ -8,7 +8,6 @@
 <img src="https://github.com/user-attachments/assets/9e8d4084-a313-4443-8265-1b5547e143a5" width="250" />
 
 
-
 ## Overview
 
 This project is an Online Radio App that allows users to stream live radio stations, enjoy a music player, and experience beautiful visualizers. The app features customizable themes for a personalized user experience.
