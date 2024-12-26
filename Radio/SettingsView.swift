@@ -1,11 +1,4 @@
-////
-////  SettingsView.swift
-////  Radio
-////
-////  Created by Jigar on 17/06/24.
-////
-//
-//
+// SettingsView.swift
 import SwiftUI
 
 struct SettingsView: View {
@@ -20,10 +13,8 @@ struct SettingsView: View {
                 .padding(.top, 40)
                 .padding(.bottom, 20)
             
-            
-
             Picker("Equalizer", selection: $audioPlayerManager.currentEqualizerSetting) {
-                ForEach(AudioPlayerManager.EqualizerSetting.allCases, id: \.self) { setting in
+                ForEach(EqualizerSetting.allCases, id: \.self) { setting in
                     Text(setting.rawValue)
                         .foregroundColor(.white)
                         .tag(setting)
@@ -31,7 +22,9 @@ struct SettingsView: View {
             }
             .pickerStyle(WheelPickerStyle())
             .background(
-                LinearGradient(gradient: Gradient(colors: [Color.gray.opacity(0.8), Color.black.opacity(0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                LinearGradient(gradient: Gradient(colors: [Color.gray.opacity(0.8), Color.black.opacity(0.8)]),
+                             startPoint: .topLeading,
+                             endPoint: .bottomTrailing)
                     .cornerRadius(10)
                     .shadow(radius: 5)
             )
@@ -55,7 +48,9 @@ struct SettingsView: View {
             .padding(.bottom, 40)
         }
         .background(
-            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]), startPoint: .top, endPoint: .bottom)
+            LinearGradient(gradient: Gradient(colors: [Color.black, Color.gray]),
+                         startPoint: .top,
+                         endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
         )
     }
@@ -64,7 +59,9 @@ struct SettingsView: View {
 // Preview for SwiftUI canvas
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView(audioPlayerManager: AudioPlayerManager())
+        SettingsView(audioPlayerManager: AudioPlayerManager.shared)
             .preferredColorScheme(.dark)
     }
 }
+
+

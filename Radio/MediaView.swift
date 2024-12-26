@@ -1,17 +1,11 @@
-//
-//  MediaView.swift
-//  Radio
-//
-//  Created by Jigar on 21/06/24.
-//
-
 import SwiftUI
 
 struct MediaView: View {
+    // MARK: - Properties
     @ObservedObject var libraryViewModel = LibraryViewModel.shared
     @ObservedObject var audioPlayerManager = AudioPlayerManager.shared
-
-    @State private var isSidebarExpanded = false
+    
+    // MARK: - State Variables
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var currentGradientIndex = 0
@@ -21,112 +15,46 @@ struct MediaView: View {
     @State private var isMediaLibraryViewPresented = false
     @State private var isVisualizerViewPresented = false
     
-
+    // MARK: - Constants
+    private let buttonSize: CGFloat = 30
+    private let largeButtonSize: CGFloat = 40
+    private let spacing: CGFloat = 20
+    private let cornerRadius: CGFloat = 15
+    
+    let gradients: [[Color]] = [
+        [.blue, .purple],
+        [.purple, .red],
+        [.red, .orange],
+        [.orange, .yellow],
+        [.yellow, .green],
+        [.green, .blue]
+    ]
+    
+    // MARK: - Computed Properties
+    private var isPlaying: Bool {
+        audioPlayerManager.isPlaying
+    }
+    
+    // MARK: - Body
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
                 ZStack {
-                    HStack(spacing: 0) {
-                        VStack {
-                            NowPlayingView(audioPlayerManager: audioPlayerManager)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .padding()
-                                .background(
-                                    LinearGradient(gradient: Gradient(colors: useDedicatedGradient ? (currentGradientIndex == 0 ? dedicatedGradient : lightGradient) : gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                        .cornerRadius(10)
-                                        .shadow(radius: 5)
-                                )
-                                .padding()
-                            
-                            HStack {
-                                Text(timeString(time: audioPlayerManager.currentPlaybackTime))
-                                    .foregroundColor(.white)
-                                Slider(value: Binding(get: {
-                                    self.audioPlayerManager.currentPlaybackTime
-                                }, set: { newTime in
-                                    self.audioPlayerManager.seek(to: newTime)
-                                }), in: 0...self.audioPlayerManager.currentSongDuration)
-                                .accentColor(.green)
-                                Text("-\(timeString(time: audioPlayerManager.currentSongDuration - audioPlayerManager.currentPlaybackTime))")
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.vertical, 5)
-                            .padding(.bottom, 1)
-
-                            HStack(spacing: 20) {
-                                controlButton(iconName: "shuffle", action: audioPlayerManager.shuffle, color: .black)
-                                controlButton(iconName: "backward.fill", action: audioPlayerManager.playPrevious, color: .gray)
-                                controlButton(iconName: audioPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", action: audioPlayerManager.togglePlayPause, color: .black, size: 40)
-                                controlButton(iconName: "forward.fill", action: audioPlayerManager.playNext, color: .gray)
-                                controlButton(iconName: "stop.fill", action: audioPlayerManager.stop, color: .red)
-                                controlButton(iconName: "paintbrush.fill", action: {
-                                    useDedicatedGradient = false
-                                    currentGradientIndex = (currentGradientIndex + 1) % gradients.count
-                                }, color: .blue)
-                                controlButton(iconName: "circle.lefthalf.fill", action: {
-                                    useDedicatedGradient.toggle()
-                                    currentGradientIndex = 0
-                                }, color: .purple)
-                            }
-                            .padding()
-                        }
-                        .background(
-                            ZStack {
-                                if useDedicatedGradient {
-                                    AngularGradient(gradient: Gradient(colors: [Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.purple, Color.red]), center: .center, angle: .degrees(animationPhase))
-                                        .opacity(0.5)
-                                        .animation(Animation.linear(duration: 2).repeatForever(autoreverses: false), value: animationPhase)
-                                        .onAppear {
-                                            animationPhase += 360
-                                        }
-                                } else {
-                                    LinearGradient(gradient: Gradient(colors: gradients[currentGradientIndex]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                                        .edgesIgnoringSafeArea(.all)
-                                }
-                            }
-                        )
+                    backgroundLayer
+                    
+                    VStack(spacing: spacing) {
+                        nowPlayingSection
+                        progressSection
+                        controlsSection
+                        volumeSection
                     }
-
+                    .padding()
+                    
                     if isSearching {
-                        Color.black.opacity(0.4)
-                            .edgesIgnoringSafeArea(.all)
-                            .onTapGesture {
-                                isSearching = false
-                                searchText = ""
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
+                        searchOverlay
                     }
                 }
-                .navigationBarItems(
-//                    leading: Button(action: {
-//                        withAnimation {
-//                            isSidebarExpanded.toggle()
-//                        }
-//                    }) {
-//                        Image(systemName: "line.horizontal.3")
-//                            .imageScale(.large)
-//                    },
-                    trailing: HStack {
-                        Button(action: {
-                            isMediaLibraryViewPresented.toggle()
-                        }) {
-                            Image(systemName: "music.note.list")
-                                .imageScale(.large)
-                        }
-                        Button(action: {
-                            isVisualizerViewPresented.toggle()
-                        }) {
-                            Image(systemName: "waveform.path.ecg")
-                                .imageScale(.large)
-                        }
-                        Button(action: {
-                            isSettingsViewPresented.toggle()
-                        }) {
-                            Image(systemName: "headphones.circle")
-                                .imageScale(.large)
-                        }
-                    }
-                )
+                .navigationBarItems(trailing: navigationButtons)
                 .sheet(isPresented: $isSettingsViewPresented) {
                     SettingsView(audioPlayerManager: audioPlayerManager)
                 }
@@ -136,11 +64,122 @@ struct MediaView: View {
                 .sheet(isPresented: $isVisualizerViewPresented) {
                     VisualizerView()
                 }
-                .onAppear {
-                    libraryViewModel.fetchSongs()
-                    audioPlayerManager.setupAudioSession()
+                .onAppear(perform: setupOnAppear)
+            }
+        }
+    }
+    
+    private var volumeSection: some View {
+            HStack {
+                Image(systemName: "speaker.fill")
+                    .foregroundColor(.white)
+                
+                Slider(
+                    value: Binding(
+                        get: { Double(audioPlayerManager.volume) },
+                        set: { audioPlayerManager.updateVolume(Float($0)) }
+                    ),
+                    in: 0...1
+                )
+                .accentColor(.white)
+                
+                Image(systemName: "speaker.wave.3.fill")
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal)
+        }
+    
+    // MARK: - View Components
+    private var backgroundLayer: some View {
+        Group {
+            if useDedicatedGradient {
+                AnimatedGradientBackground(phase: $animationPhase)
+            } else {
+                StaticGradientBackground(gradientIndex: currentGradientIndex)
+            }
+        }
+        .edgesIgnoringSafeArea(.all)
+    }
+    
+    private var nowPlayingSection: some View {
+        NowPlayingView(audioPlayerManager: audioPlayerManager)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(Color.black.opacity(0.3))
+                    .shadow(radius: 10)
+            )
+    }
+    
+    private var progressSection: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text(timeString(time: audioPlayerManager.currentPlaybackTime))
+                    .foregroundColor(.white)
+                Spacer()
+                Text("-\(timeString(time: audioPlayerManager.currentSongDuration - audioPlayerManager.currentPlaybackTime))")
+                    .foregroundColor(.white)
+            }
+            .font(.caption)
+            
+            CustomSlider(value: Binding(
+                get: { audioPlayerManager.currentPlaybackTime },
+                set: { audioPlayerManager.seek(to: $0) }
+            ), in: 0...audioPlayerManager.currentSongDuration)
+        }
+        .padding(.horizontal)
+    }
+    
+    private var controlsSection: some View {
+        HStack(spacing: spacing) {
+            MediaControlButton(icon: "shuffle", color: .white, action: audioPlayerManager.shuffle)
+            MediaControlButton(icon: "backward.fill", color: .white, action: audioPlayerManager.playPrevious)
+            
+            PlayPauseButton(isPlaying: isPlaying) {
+                audioPlayerManager.togglePlayPause()
+            }
+            
+            MediaControlButton(icon: "forward.fill", color: .white, action: audioPlayerManager.playNext)
+            MediaControlButton(icon: "stop.fill", color: .red, action: audioPlayerManager.stop)
+        }
+        .padding(.vertical)
+    }
+    
+    
+    private var navigationButtons: some View {
+        HStack(spacing: spacing) {
+            NavigationButton(icon: "music.note.list", action: { isMediaLibraryViewPresented.toggle() })
+            NavigationButton(icon: "waveform.path.ecg", action: { isVisualizerViewPresented.toggle() })
+            NavigationButton(icon: "headphones.circle", action: { isSettingsViewPresented.toggle() })
+        }
+    }
+    
+    private var searchOverlay: some View {
+        Color.black.opacity(0.4)
+            .edgesIgnoringSafeArea(.all)
+            .onTapGesture {
+                withAnimation {
+                    isSearching = false
+                    searchText = ""
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                                 to: nil,
+                                                 from: nil,
+                                                 for: nil)
                 }
             }
+    }
+    
+    // MARK: - Helper Functions
+    private func setupOnAppear() {
+        libraryViewModel.fetchSongs()
+        audioPlayerManager.setupAudioSession()
+        startGradientAnimation()
+    }
+    
+    private func startGradientAnimation() {
+        withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: false)) {
+            animationPhase += 360
         }
     }
     
@@ -149,15 +188,97 @@ struct MediaView: View {
         let seconds = Int(time) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
+}
+
+// MARK: - Supporting Views
+struct MediaControlButton: View {
+    let icon: String
+    let color: Color
+    let action: () -> Void
     
-    @ViewBuilder
-    private func controlButton(iconName: String, action: @escaping () -> Void, color: Color, size: CGFloat = 30) -> some View {
+    var body: some View {
         Button(action: action) {
-            Image(systemName: iconName)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
+            Image(systemName: icon)
+                .font(.system(size: 20))
                 .foregroundColor(color)
+                .frame(width: 44, height: 44)
+                .background(Color.white.opacity(0.2))
+                .clipShape(Circle())
         }
+    }
+}
+
+struct PlayPauseButton: View {
+    let isPlaying: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.white)
+        }
+    }
+}
+
+struct NavigationButton: View {
+    let icon: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .imageScale(.large)
+                .foregroundColor(.white)
+        }
+    }
+}
+
+struct CustomSlider: View {
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    
+    init(value: Binding<Double>, in range: ClosedRange<Double>) {
+        self._value = value
+        self.range = range
+    }
+    
+    var body: some View {
+        Slider(value: $value, in: range)
+            .accentColor(.white)
+            .background(
+                Capsule()
+                    .fill(Color.white.opacity(0.2))
+                    .frame(height: 4)
+            )
+    }
+}
+
+// MARK: - Background Views
+struct AnimatedGradientBackground: View {
+    @Binding var phase: Double
+    
+    var body: some View {
+        AngularGradient(gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .purple, .red]),
+                       center: .center,
+                       angle: .degrees(phase))
+            .opacity(0.5)
+    }
+}
+
+struct StaticGradientBackground: View {
+    let gradientIndex: Int
+    
+    var body: some View {
+        LinearGradient(gradient: Gradient(colors: gradients[gradientIndex]),
+                      startPoint: .topLeading,
+                      endPoint: .bottomTrailing)
+    }
+}
+
+// MARK: - Preview
+struct MediaView_Previews: PreviewProvider {
+    static var previews: some View {
+        MediaView()
     }
 }
