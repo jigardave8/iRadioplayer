@@ -93,7 +93,7 @@ struct MediaView: View {
     private var backgroundLayer: some View {
         Group {
             if useDedicatedGradient {
-                AnimatedGradientBackground(phase: $animationPhase)
+                AnimatedGradientBackground(phase: animationPhase)
             } else {
                 StaticGradientBackground(gradientIndex: currentGradientIndex)
             }
@@ -254,31 +254,3 @@ struct CustomSlider: View {
     }
 }
 
-// MARK: - Background Views
-struct AnimatedGradientBackground: View {
-    @Binding var phase: Double
-    
-    var body: some View {
-        AngularGradient(gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .purple, .red]),
-                       center: .center,
-                       angle: .degrees(phase))
-            .opacity(0.5)
-    }
-}
-
-struct StaticGradientBackground: View {
-    let gradientIndex: Int
-    
-    var body: some View {
-        LinearGradient(gradient: Gradient(colors: gradients[gradientIndex]),
-                      startPoint: .topLeading,
-                      endPoint: .bottomTrailing)
-    }
-}
-
-// MARK: - Preview
-struct MediaView_Previews: PreviewProvider {
-    static var previews: some View {
-        MediaView()
-    }
-}

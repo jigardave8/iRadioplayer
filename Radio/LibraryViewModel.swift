@@ -38,3 +38,9 @@ class LibraryViewModel: ObservableObject {
         }
     }
 }
+
+extension LibraryViewModel {
+    func sortSongs(by comparator: (MPMediaItem, MPMediaItem) -> Bool) {
+        songs.sort(by: comparator)
+    }
+}
