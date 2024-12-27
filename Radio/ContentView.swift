@@ -1,9 +1,9 @@
-
 import SwiftUI
 import AVFoundation
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .radio
+    @Environment(\.colorScheme) var colorScheme
     
     enum Tab: String, CaseIterable {
         case radio = "Radio"
@@ -12,63 +12,53 @@ struct ContentView: View {
         var icon: String {
             switch self {
             case .radio:
-                return "radio"
+                return "radio.fill"
             case .media:
-                return "music.note"
+                return "music.note.list"
             }
         }
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            
-            switch selectedTab {
-            case .radio:
-                RadioView()
-            case .media:
-                MediaView()
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 0) {
-                ForEach(Tab.allCases, id: \.self) { tab in
-                    Button(action: {
-                        withAnimation {
-                            selectedTab = tab
-                        }
-                    }) {
-                        VStack {
-                            Image(systemName: tab.icon)
-                                .font(.system(size: 24))
-                            Text(tab.rawValue)
-                                .font(.headline)
-                        }
-                        .padding()
-                        .foregroundColor(tab == selectedTab ? Color.white : Color.gray)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .background(tab == selectedTab ? Color.blue : Color.clear)
+        TabView(selection: $selectedTab) {
+            RadioView()
+                .tag(Tab.radio)
+                .tabItem {
+                    Label(Tab.radio.rawValue, systemImage: Tab.radio.icon)
                 }
-            }
-            .background(Color.black)
+            
+            MediaView()
+                .tag(Tab.media)
+                .tabItem {
+                    Label(Tab.media.rawValue, systemImage: Tab.media.icon)
+                }
         }
-        .padding(.bottom, 20) // Add padding to the bottom of the VStack
-        .background(Color(red: 0.2, green: 0.2, blue: 0.2).edgesIgnoringSafeArea(.all))
+        .accentColor(.blue)
+        .preferredColorScheme(.dark) // Force dark mode for better media player experience
         .onAppear {
+            setupAppearance()
             setupAudioSession()
         }
     }
     
-    
+    private func setupAppearance() {
+        // Custom tab bar appearance
+        let tabBarAppearance = UITabBarAppearance()
+        tabBarAppearance.configureWithOpaqueBackground()
+        tabBarAppearance.backgroundColor = UIColor(Color(red: 0.1, green: 0.1, blue: 0.1))
+        
+        UITabBar.appearance().standardAppearance = tabBarAppearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
+    }
     
     private func setupAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            print("Failed to configure audio session:", error.localizedDescription)
+            print("Audio session setup failed:", error)
         }
     }
 }

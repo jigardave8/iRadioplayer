@@ -141,7 +141,7 @@ struct MediaView: View {
             }
             
             MediaControlButton(icon: "forward.fill", color: .white, action: audioPlayerManager.playNext)
-            MediaControlButton(icon: "stop.fill", color: .red, action: audioPlayerManager.stop)
+//            MediaControlButton(icon: "stop.fill", color: .red, action: audioPlayerManager.stop)
         }
         .padding(.vertical)
     }
